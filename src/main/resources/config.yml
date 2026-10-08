@@ -6,7 +6,7 @@
 #  prisonniers en prison et refuse les bannis). Les sanctions sont dans la base commune : une sanction donnée sur
 #  un serveur vaut partout. Tout se fait dans /mod (staff) et /appel (joueurs).
 #  Une permission par action (voir le README) : chaque grade du staff reçoit seulement ce qu'il peut faire.
-#  Les textes (noms des motifs compris) sont dans lang/. Toute modification nécessite un redémarrage du serveur.
+#  Les textes (noms des motifs compris) sont dans lang/. Aussi : /staff (mode staff), /report (signalements). Toute modification nécessite un redémarrage du serveur.
 
 # Le barème : chaque motif a ses étapes, de la première fois à la récidive ; au-delà de la dernière, la dernière
 # se répète. Une étape : « warn », « mute 10m », « jail 3d », « ban perm » (s, m, h, d, w ; perm = définitive).
@@ -78,3 +78,21 @@ filter:
   strikes-minutes: 10
   # Auteur des sanctions du filtre dans l'historique.
   staff-name: Filter
+
+# Signalements (/report) : les motifs proposés (nom affiché : lang/ > report-reason.<motif>) et leur icône.
+reports:
+  # Un signalement par joueur toutes les ... secondes (sur tout le réseau).
+  cooldown-seconds: 60
+  reasons:
+    cheat: DIAMOND_SWORD
+    insult: BLAZE_POWDER
+    spam: PAPER
+    grief: FLINT_AND_STEEL
+    scam: GOLD_INGOT
+    bug: COMMAND_BLOCK
+    other: BOOK
+
+# Mode staff (/staff) : ni entrée ni sortie sur les serveurs dont le nom commence par l'un de ces préfixes
+# (la prison n'a pas EterSync : l'inventaire rendu y resterait coincé).
+staff:
+  blocked-servers: [prison]

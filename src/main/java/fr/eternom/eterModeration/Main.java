@@ -14,6 +14,11 @@ import fr.eternom.eterModeration.module.filter.FilterListener;
 import fr.eternom.eterModeration.module.menu.ModGui;
 import fr.eternom.eterModeration.module.record.RecordListener;
 import fr.eternom.eterModeration.module.record.Records;
+import fr.eternom.eterModeration.module.report.ReportRepository;
+import fr.eternom.eterModeration.module.report.ReportService;
+import fr.eternom.eterModeration.module.staff.Freeze;
+import fr.eternom.eterModeration.module.staff.StaffInventories;
+import fr.eternom.eterModeration.module.staff.StaffMode;
 import fr.eternom.eterModeration.module.sanction.Enforcement;
 import fr.eternom.eterModeration.module.sanction.Labels;
 import fr.eternom.eterModeration.module.sanction.Motives;
@@ -38,9 +43,10 @@ import java.util.Set;
  */
 public final class Main extends JavaPlugin {
 
-    /** Version minimale d'EterLib : Redis obligatoire (bus réseau) depuis 1.8.0. */
-    private static final String REQUIRED_ETERLIB = "1.8.0";
-    /** Préfixe des tables : etermod_sanctions, etermod_appeals, etermod_notes, etermod_chat, etermod_links, etermod_settings. */
+    /** Version minimale d'EterLib : invisibilité réseau (Vanish) depuis 1.9.0. */
+    private static final String REQUIRED_ETERLIB = "1.9.1";
+    /** Préfixe des tables : etermod_sanctions, etermod_appeals, etermod_notes, etermod_chat, etermod_links, etermod_settings,
+     * etermod_reports, etermod_staff_inventories. */
     private static final String TABLE_PREFIX = "etermod_";
     private static final long DAY_TICKS = 20L * 60 * 60 * 24;
 
@@ -49,6 +55,8 @@ public final class Main extends JavaPlugin {
     private MuteGuard muteGuard;
     private FilterListener filterListener;
     private RecordListener recordListener;
+    private Freeze freeze;
+    private StaffMode staffMode;
 
     @Override
     public void onEnable() {
@@ -78,9 +86,14 @@ public final class Main extends JavaPlugin {
         Enforcement enforcement = new Enforcement(this, sanctionRepository, bus);
         SanctionService sanctions = new SanctionService(this, sanctionRepository, enforcement, alerts, bus, messages, labels, server);
         AppealService appeals = new AppealService(this, new AppealRepository(database), sanctions, alerts, bus, messages, labels);
-        gui = new ModGui(this, sanctions, appeals, records, motives, lib.getPlayers(), messages, labels);
-
         Set<String> privateCommands = lower(getConfig().getStringList("private-commands"));
+        freeze = new Freeze(this, lib.getRedis(), bus, alerts, messages, privateCommands);
+        ReportService reports = new ReportService(this, new ReportRepository(database), lib.getRedis(), bus, alerts, messages, server,
+                getConfig().getConfigurationSection("reports"));
+        gui = new ModGui(this, sanctions, appeals, records, motives, lib.getPlayers(), messages, labels, reports, freeze);
+        staffMode = new StaffMode(this, lib.getRedis(), new StaffInventories(database), freeze, gui, alerts, messages,
+                getConfig().getStringList("staff.blocked-servers"));
+
         muteGuard = new MuteGuard(enforcement, messages, labels, privateCommands);
         filterListener = new FilterListener(this, new ChatFilter(getConfig().getConfigurationSection("filter")), sanctions, motives,
                 alerts, messages, privateCommands, getConfig().getConfigurationSection("filter"));
@@ -140,5 +153,13 @@ public final class Main extends JavaPlugin {
 
     public RecordListener getRecordListener() {
         return recordListener;
+    }
+
+    public Freeze getFreeze() {
+        return freeze;
+    }
+
+    public StaffMode getStaffMode() {
+        return staffMode;
     }
 }

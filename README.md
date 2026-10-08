@@ -9,8 +9,9 @@ La vie en prison (travail, remise de peine...) n'est **pas** ici : elle viendra 
 
 ## Prérequis
 
-- **EterLib 1.8.0+** (`depend`) : base, Redis (bus réseau), langues, menus (cadre, Dialogs), joueurs du réseau.
-- **EterVelocityModeration** sur le proxy (même base) : prison et ban.
+- **EterLib 1.9.1+** (`depend`) : base, Redis (bus réseau), invisibilité réseau (Vanish), langues, menus (cadre, Dialogs), joueurs du réseau.
+- **EterVelocityModeration 1.1.0+** sur le proxy (même base) : prison et ban, appliqués tout de suite.
+- **EterTab 1.1.13+** : les invisibles retirés de la liste Tab du réseau.
 - **EterChat 1.1.7+** : chat séparé des serveurs prison (`prison.server-prefix`).
 
 ## Les sanctions
@@ -46,11 +47,15 @@ Un joueur hors ligne n'a besoin de rien : le proxy lit ses sanctions à la conne
 
 Tout se fait dans les menus ; saisies et confirmations par des fenêtres (Dialogs).
 
-- **`/mod`** (staff) : chercher un joueur, les appels à traiter, les dernières sanctions du réseau.
+- **`/mod`** (staff) : chercher un joueur, les appels et les signalements à traiter, les dernières sanctions du réseau.
 - **`/mod <joueur>`** : sa fiche (connecté où, sanctions en cours) → sanctionner (motifs + sanctions libres),
-  historique (lever), notes du staff, derniers messages (affichés dans le chat), comptes liés.
+  historique (lever), notes du staff, derniers messages (affichés dans le chat), comptes liés ; s'il est connecté :
+  aller le voir, le geler.
 - **`/appel`** (joueurs) : ses sanctions en cours et ses avertissements, faire appel (une fois par sanction), l'état
   et la réponse du staff. Le joueur ne voit pas qui l'a sanctionné.
+- **`/report [joueur]`** (joueurs) : le motif dans un menu (`reports.reasons`), un détail facultatif ; un signalement
+  par `reports.cooldown-seconds` (Redis, réseau). Le staff est alerté ; l'auteur est prévenu quand c'est traité.
+- **`/staff`** : le mode staff, sur tout le réseau (voir `staff`).
 
 ## Permissions : une par action
 
@@ -66,8 +71,13 @@ Chaque grade du staff reçoit exactement ce qu'il peut faire (LuckPerms). `eter.
 | `eter.mod.appeals` | traiter les appels |
 | `eter.mod.history` / `.notes` / `.chatlog` / `.alts` | historique et dernières sanctions / notes / messages / comptes liés |
 | `eter.mod.alerts` | recevoir les alertes du réseau |
+| `eter.mod.staff` | `/staff`, aller voir un joueur depuis sa fiche |
+| `eter.mod.freeze` | geler un joueur |
+| `eter.mod.reports` | traiter les signalements |
+| `eter.vanish.see` (EterLib) | voir les invisibles (donné par `eter.mod.*`) |
 | `eter.mod.bypass.filter` | pas de filtre du chat |
 | `eter.mod.appeal` | `/appel` (tout le monde) |
+| `eter.mod.report` | `/report` (tout le monde) |
 
 Les permissions des motifs sont créées au démarrage d'après la config (enfants de `eter.mod.motive.*`).
 
@@ -91,10 +101,22 @@ Les permissions des motifs sont créées au démarrage d'après la config (enfan
   `FilterListener` (bloque, prévient ; un mot interdit → `filter.word-motive` tout de suite ; spam/majuscules →
   `filter.spam-motive` au `filter.strikes`-ième en `filter.strikes-minutes`). Les messages privés ne sont filtrés que
   pour les mots interdits.
+- **`staff`** :
+  - **mode staff** (`StaffMode`, `/staff`) : l'inventaire part en base (`etermod_staff_inventories`) AVANT d'être vidé, et
+    il est repris (lu puis effacé) avant d'être rendu : rien de perdu ni de rendu deux fois. Invisible sur tout le
+    réseau (EterLib `Vanish`), vol, invulnérable, pas de ramassage ni de monstres. Outils (marqués, ni posés, ni jetés,
+    ni rangés ailleurs) : fiche (clic droit sur un joueur), geler, joueur au hasard du réseau, visible/invisible,
+    signalements, quitter. L'état (Redis `etermod:staff`) suit le joueur : à l'arrivée sur un serveur, les outils
+    manquants sont redonnés 3 s après (le temps qu'EterSync rende l'inventaire). Pas d'entrée ni de sortie sur
+    `staff.blocked-servers` (la prison, sans EterSync : l'inventaire rendu y resterait).
+  - **geler** (`Freeze`) : plus de déplacement (la tête seulement), de blocs, de coups ; seules les commandes de
+    `private-commands`. Redis `etermod:frozen` + bus : appliqué sur le serveur du joueur, et après un changement de
+    serveur ou une reconnexion. Une déconnexion pendant le gel alerte le staff.
+- **`report`** : `etermod_reports`, ouverts jusqu'à ce qu'un membre du staff les traite.
 - **`menu`** : `ModGui` (chargement en tâche de fond puis ouverture, fenêtres) et les menus. Cadre rouge pour le staff,
   orange pour `/appel`.
 
 ## Tables (`etermod_`)
 
 `sanctions` (lue aussi par le proxy : `uuid`, `type` en majuscules, `expires_at` 0 = définitive, `lifted_at` 0 = en
-cours), `appeals`, `notes`, `chat`, `links`, `settings`.
+cours), `appeals`, `notes`, `chat`, `links`, `settings`, `reports`, `staff_inventories`.

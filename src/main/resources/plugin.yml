@@ -19,11 +19,24 @@ commands:
     usage: /appel
     aliases: [appeal]
     permission: eter.mod.appeal
+  staff:
+    description: Entrer dans le mode staff ou en sortir (invisible, outils).
+    usage: /staff
+    aliases: [staffmode, sm]
+    permission: eter.mod.staff
+  report:
+    description: Signaler un joueur au staff.
+    usage: /report [joueur]
+    aliases: [signaler]
+    permission: eter.mod.report
 
 # Une permission par action : chaque grade du staff reçoit exactement ce qu'il peut faire (LuckPerms).
 permissions:
   eter.mod.appeal:
     description: Voir ses sanctions et faire appel (/appel).
+    default: true
+  eter.mod.report:
+    description: Signaler un joueur (/report).
     default: true
   eter.mod.use:
     description: Ouvrir /mod et la fiche d'un joueur.
@@ -67,6 +80,15 @@ permissions:
   eter.mod.alts:
     description: Voir les comptes liés (même connexion).
     default: op
+  eter.mod.staff:
+    description: 'Mode staff (/staff) : invisible sur tout le réseau, outils ; aller voir un joueur depuis sa fiche.'
+    default: op
+  eter.mod.freeze:
+    description: Geler un joueur (il ne bouge plus, pour lui parler).
+    default: op
+  eter.mod.reports:
+    description: Traiter les signalements.
+    default: op
   eter.mod.alerts:
     description: Recevoir les alertes de modération du réseau.
     default: op
@@ -78,6 +100,11 @@ permissions:
     default: op
     children:
       eter.mod.appeal: true
+      eter.mod.report: true
+      eter.mod.staff: true
+      eter.mod.freeze: true
+      eter.mod.reports: true
+      eter.vanish.see: true
       eter.mod.use: true
       eter.mod.warn: true
       eter.mod.mute: true

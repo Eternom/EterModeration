@@ -9,6 +9,9 @@ import fr.eternom.eterModeration.module.menu.ModGui.Profile;
 import fr.eternom.eterModeration.module.sanction.Labels;
 import fr.eternom.eterModeration.module.sanction.Sanction;
 import fr.eternom.eterModeration.module.sanction.Target;
+import fr.eternom.eterModeration.module.staff.Freeze;
+import fr.eternom.eterModeration.module.staff.StaffMode;
+import fr.eternom.eterLib.module.player.PlayerDirectory.NetworkPlayer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -27,11 +30,13 @@ import java.util.List;
 class PlayerMenu implements Menu {
 
     private static final int HEAD = 13;
+    private static final int GOTO = 28;
     private static final int SANCTION = 29;
     private static final int HISTORY = 30;
     private static final int NOTES = 31;
     private static final int CHAT = 32;
     private static final int ALTS = 33;
+    private static final int FREEZE = 34;
     private static final int BACK = 49;
 
     private final ModGui gui;
@@ -69,6 +74,13 @@ class PlayerMenu implements Menu {
             case ALTS -> {
                 Sounds.page(player);
                 gui.openAlts(player, target);
+            }
+            case GOTO -> gui.goTo(player, target);
+            case FREEZE -> {
+                if (online()) {
+                    gui.freeze().toggle(player, target);
+                    gui.openPlayer(player, target);
+                }
             }
             case BACK -> {
                 Sounds.page(player);
@@ -109,7 +121,15 @@ class PlayerMenu implements Menu {
         inventory.setItem(NOTES, button(Material.WRITABLE_BOOK, "player.notes", ModGui.NOTES));
         inventory.setItem(CHAT, button(Material.OAK_SIGN, "player.chat", ModGui.CHATLOG));
         inventory.setItem(ALTS, button(Material.PLAYER_HEAD, "player.alts", ModGui.ALTS));
+        if (online()) {
+            inventory.setItem(GOTO, button(Material.ENDER_PEARL, "player.goto", StaffMode.PERMISSION));
+            inventory.setItem(FREEZE, button(Material.PACKED_ICE, "player.freeze", Freeze.PERMISSION));
+        }
         inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-staff"), List.of()));
+    }
+
+    private boolean online() {
+        return profile.network().map(NetworkPlayer::isOnline).orElse(false);
     }
 
     private ItemStack button(Material icon, String key, String permission) {

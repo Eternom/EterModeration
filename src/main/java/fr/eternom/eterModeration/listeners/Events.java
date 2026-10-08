@@ -9,6 +9,8 @@ public class Events {
         register(main, main.getMuteGuard());
         register(main, main.getFilterListener());
         register(main, main.getRecordListener());
+        register(main, main.getFreeze());
+        register(main, main.getStaffMode());
     }
 
     private static void register(Main main, Listener listener) {

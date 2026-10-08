@@ -1,15 +1,20 @@
 package fr.eternom.eterModeration.module.menu;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import fr.eternom.eterLib.EterLib;
 import fr.eternom.eterLib.helper.gui.Dialogs;
 import fr.eternom.eterLib.helper.gui.Items;
 import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.task.Tasks;
 import fr.eternom.eterLib.module.player.PlayerDirectory;
 import fr.eternom.eterLib.module.player.PlayerDirectory.NetworkPlayer;
+import fr.eternom.eterLib.module.teleport.Destination;
 import fr.eternom.eterModeration.module.appeal.AppealRepository.Appeal;
 import fr.eternom.eterModeration.module.appeal.AppealService;
 import fr.eternom.eterModeration.module.record.Records;
+import fr.eternom.eterModeration.module.report.ReportService;
+import fr.eternom.eterModeration.module.staff.Freeze;
+import fr.eternom.eterModeration.module.staff.StaffMode;
 import fr.eternom.eterModeration.module.record.Records.ChatLine;
 import fr.eternom.eterModeration.module.sanction.Labels;
 import fr.eternom.eterModeration.module.sanction.Motives;
@@ -63,6 +68,10 @@ public class ModGui {
     record Profile(Target target, Optional<NetworkPlayer> network, List<Sanction> active) {
     }
 
+    /** Les compteurs du menu /mod. */
+    record Counts(int appeals, int reports) {
+    }
+
     /** Un appel ouvert et la sanction visée. */
     record OpenAppeal(Appeal appeal, Sanction sanction) {
     }
@@ -75,9 +84,13 @@ public class ModGui {
     private final PlayerDirectory players;
     private final Messages messages;
     private final Labels labels;
+    private final ReportService reports;
+    private final Freeze freeze;
 
     public ModGui(JavaPlugin plugin, SanctionService sanctions, AppealService appeals, Records records, Motives motives,
-                  PlayerDirectory players, Messages messages, Labels labels) {
+                  PlayerDirectory players, Messages messages, Labels labels, ReportService reports, Freeze freeze) {
+        this.reports = reports;
+        this.freeze = freeze;
         this.plugin = plugin;
         this.sanctions = sanctions;
         this.appeals = appeals;
@@ -91,7 +104,8 @@ public class ModGui {
     // ---------- Staff ----------
 
     public void openStaff(Player staff) {
-        load(staff, () -> appeals.repository().openAppeals().size(), count -> new StaffMenu(this, staff, count).getInventory());
+        load(staff, () -> new Counts(appeals.repository().openAppeals().size(), reports.repository().countOpen()),
+                counts -> new StaffMenu(this, staff, counts).getInventory());
     }
 
     /** /mod <joueur> : le dernier joueur vu sous ce nom, sur tout le réseau. */
@@ -101,7 +115,7 @@ public class ModGui {
                 () -> messages.send(staff, "player.unknown", "player", name)), () -> messages.send(staff, "error.generic"));
     }
 
-    void openPlayer(Player staff, Target target) {
+    public void openPlayer(Player staff, Target target) {
         load(staff, () -> new Profile(target, players.get(target.uuid()), repository().active(target.uuid(), System.currentTimeMillis())),
                 profile -> new PlayerMenu(this, staff, profile).getInventory());
     }
@@ -151,6 +165,44 @@ public class ModGui {
             }, list -> new AppealsMenu(this, staff, list).getInventory());
         }
     }
+
+    /** Les signalements ouverts (eter.mod.reports). */
+    public void openReports(Player staff) {
+        if (allowed(staff, ReportService.PERMISSION)) {
+            load(staff, () -> reports.repository().open(28), list -> new ReportsMenu(this, staff, list).getInventory());
+        }
+    }
+
+    /** Aller voir un joueur connecté, où qu'il soit (eter.mod.staff). */
+    void goTo(Player staff, Target target) {
+        if (!allowed(staff, StaffMode.PERMISSION)) {
+            return;
+        }
+        staff.closeInventory();
+        Tasks.async(plugin, staff, () -> players.getServer(target.uuid()), server -> server.ifPresentOrElse(
+                name -> EterLib.get().getTeleports().teleportNow(staff, Destination.toPlayer(target.uuid(), name, target.name())),
+                () -> messages.send(staff, "staff.offline", "player", target.name())), () -> messages.send(staff, "error.generic"));
+    }
+
+    // ---------- Joueur ----------
+
+    /** /report : le joueur à signaler (fenêtre), puis le motif. */
+    public void askReport(Player reporter) {
+        askText(reporter, "report-who", 16, name -> {
+            if (!name.isEmpty()) {
+                openReport(reporter, name);
+            }
+        }, () -> { });
+    }
+
+    /** /report <joueur> : le motif (menu), puis le détail (fenêtre). */
+    public void openReport(Player reporter, String name) {
+        Tasks.async(plugin, reporter, () -> players.find(name), found -> found.ifPresentOrElse(
+                target -> reporter.openInventory(new ReportReasonsMenu(this, reporter, new Target(target.uuid(), target.name())).getInventory()),
+                () -> messages.send(reporter, "player.unknown", "player", name)), () -> messages.send(reporter, "error.generic"));
+    }
+
+    // ---------- Staff (suite) ----------
 
     /** Les derniers messages du joueur, dans le chat du staff (on peut les copier). */
     void showChat(Player staff, Target target) {
@@ -256,6 +308,14 @@ public class ModGui {
         }
         messages.send(player, "sanction.no-permission");
         return false;
+    }
+
+    ReportService reports() {
+        return reports;
+    }
+
+    Freeze freeze() {
+        return freeze;
     }
 
     SanctionService sanctions() {

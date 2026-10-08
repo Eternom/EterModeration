@@ -43,6 +43,7 @@ sanction:
   status-lifted: "<success>●</success> <info>Lifted by <accent><staff>"
 
 notify:
+  report-closed: "<info>Your report against <accent><player></accent> was handled by the staff. Thanks!"
   warn: "<error>Warning</error> <info>for <accent><motive></accent>. <reason> <dark_gray>The next one will be heavier. Your sanctions: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
   mute: "<error>You are muted for <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>No chat, no private messages. Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
   jail: "<error>You are sent to jail for <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
@@ -70,6 +71,12 @@ appeal:
 
 alert:
   prefix: "<error>[Mod]</error> "
+  report: "<info><accent><player></accent> reports <accent><target></accent>: <reason> <dark_gray><text></dark_gray> <click:run_command:'/mod'><accent>/mod</accent></click>"
+  frozen: "<accent><staff></accent> <info>froze <accent><player>"
+  unfrozen: "<accent><staff></accent> <info>unfroze <accent><player>"
+  frozen-quit: "<error><accent><player></accent> logged out while frozen!"
+  staff-on: "<accent><staff></accent> <info>enters staff mode"
+  staff-off: "<accent><staff></accent> <info>leaves staff mode"
   given: "<accent><staff></accent> <info>→ <accent><player></accent>: <type> <time> <dark_gray>(<motive>) <reason>"
   lifted: "<accent><staff></accent> <info>lifted: <accent><player></accent> <dark_gray>(<type>)"
   filter: "<info>Forbidden word from <accent><player></accent>: <dark_gray><message>"
@@ -89,6 +96,16 @@ menu:
 
 staff:
   title: "<primary>Moderation"
+  not-here: "<error>No staff mode on this server (use a regular server)."
+  "on": "<success>Staff mode on.</success> <info>You are <accent>invisible</accent>, your inventory is put aside. <accent>/staff</accent> to leave."
+  "off": "<info>Staff mode off: your inventory is back, you are <accent>visible</accent> again."
+  vanished: "<info>You are <accent>invisible"
+  visible: "<error>You are visible"
+  nobody: "<info>Nobody else online"
+  offline: "<error><accent><player></accent> is not online."
+  reports:
+    name: "<accent>Reports <dark_gray>(<count>)"
+    lore: "<dark_gray>▸ <info>Player reports"
   search:
     name: "<accent>Find a player"
     lore: "<dark_gray>▸ <info>Their profile, online or not"
@@ -123,6 +140,12 @@ player:
   alts:
     name: "<accent>Linked accounts"
     lore: "<dark_gray>▸ <info>Same connection"
+  goto:
+    name: "<accent>Go to them"
+    lore: "<dark_gray>▸ <info>Teleported next to them, wherever they are"
+  freeze:
+    name: "<accent>Freeze / unfreeze"
+    lore: "<dark_gray>▸ <info>They can't move, so you can talk to them"
 
 motives:
   title: "<primary>Sanction <player>"
@@ -178,6 +201,16 @@ my:
   empty: "<success>No active sanction"
 
 dialogs:
+  report-who:
+    title: "<primary>Report a player"
+    body: "<info>Their name. A false report can be sanctioned."
+    label: "Name"
+    button: "Continue"
+  report:
+    title: "<primary>Report <player>"
+    body: "<info>Reason: <accent><reason></accent><newline><dark_gray>A detail helps the staff (when, where, what). Optional."
+    label: "Detail (optional)"
+    button: "Report"
   search:
     title: "<primary>Find a player"
     body: "<info>Their name (online or not, across the network)."
@@ -224,3 +257,60 @@ confirm:
     title: "<primary>Delete the note"
     body: "<info><text>"
     button: "Delete"
+
+freeze:
+  bar: "<error>You are frozen</error> <dark_gray>· <info>don't log out, a staff member will talk to you"
+  frozen: "<error>You are frozen by the staff.</error> <info>Don't log out: a staff member will talk to you in private messages."
+  unfrozen: "<success>You are no longer frozen.</success>"
+  no-command: "<error>You are frozen: only private messages are allowed."
+  done: "<success>✔</success> <info><accent><player></accent> is frozen."
+  undone: "<success>✔</success> <info><accent><player></accent> is no longer frozen."
+
+staff-tool:
+  profile:
+    name: "<accent>Player profile"
+    lore: "<dark_gray>▸ <info>Right click a player"
+  freeze:
+    name: "<accent>Freeze / unfreeze"
+    lore: "<dark_gray>▸ <info>Right click a player"
+  random:
+    name: "<accent>Random player"
+    lore: "<dark_gray>▸ <info>Right click: teleported next to a player of the network"
+  vanish:
+    name: "<accent>Visible / invisible"
+    lore: "<dark_gray>▸ <info>Right click"
+  reports:
+    name: "<accent>Reports"
+    lore: "<dark_gray>▸ <info>Right click"
+  leave:
+    name: "<error>Leave staff mode"
+    lore: "<dark_gray>▸ <info>Right click: your inventory is given back"
+
+report:
+  title: "<primary>Report <player>"
+  head: "<accent><player>"
+  head-lore: "<dark_gray>▸ <info>Pick the reason"
+  reason: "<accent><reason>"
+  click: "<dark_gray>▸ <info>Click: pick"
+  self: "<error>You can't report yourself."
+  cooldown: "<error>Wait a bit before reporting again."
+  sent: "<success>✔</success> <info>Report of <accent><player></accent> sent to the staff. Thanks!"
+  closed: "<success>✔</success> <info>Report of <accent><player></accent> handled."
+
+report-reason:
+  cheat: "Cheating"
+  insult: "Insults"
+  spam: "Spam"
+  grief: "Grief / theft"
+  scam: "Scam"
+  bug: "Bug abuse"
+  other: "Other"
+
+reports:
+  title: "<primary>Reports <dark_gray>(<count>)"
+  name: "<accent><player>"
+  reason: "<dark_gray>▸ <info>Reason: <accent><reason>"
+  details: "<dark_gray>▸ <info>“<text>”"
+  by: "<dark_gray>▸ <info>By <accent><player></accent> on <accent><date></accent> <dark_gray>(<server>)"
+  click: "<dark_gray>▸ <info>Left click: go to them · right click: handled · shift: profile"
+  empty: "<success>No report"

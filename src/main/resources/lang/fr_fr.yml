@@ -45,6 +45,7 @@ sanction:
 
 # Ce que reçoit le joueur sanctionné (où qu'il soit sur le réseau)
 notify:
+  report-closed: "<info>Ton signalement contre <accent><player></accent> a été traité par le staff. Merci !"
   warn: "<error>Avertissement</error> <info>pour <accent><motive></accent>. <reason> <dark_gray>Le prochain sera plus lourd. Tes sanctions : <click:run_command:'/appel'><accent>/appel</accent></click>"
   mute: "<error>Tu es muet pour <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Ni chat ni messages privés. Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
   jail: "<error>Tu es envoyé en prison pour <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
@@ -73,6 +74,12 @@ appeal:
 # Alertes au staff (eter.mod.alerts), sur tout le réseau
 alert:
   prefix: "<error>[Mod]</error> "
+  report: "<info><accent><player></accent> signale <accent><target></accent> : <reason> <dark_gray><text></dark_gray> <click:run_command:'/mod'><accent>/mod</accent></click>"
+  frozen: "<accent><staff></accent> <info>a gelé <accent><player>"
+  unfrozen: "<accent><staff></accent> <info>a dégelé <accent><player>"
+  frozen-quit: "<error><accent><player></accent> s'est déconnecté en étant gelé !"
+  staff-on: "<accent><staff></accent> <info>passe en mode staff"
+  staff-off: "<accent><staff></accent> <info>quitte le mode staff"
   given: "<accent><staff></accent> <info>→ <accent><player></accent> : <type> <time> <dark_gray>(<motive>) <reason>"
   lifted: "<accent><staff></accent> <info>a levé : <accent><player></accent> <dark_gray>(<type>)"
   filter: "<info>Mot interdit de <accent><player></accent> : <dark_gray><message>"
@@ -92,6 +99,16 @@ menu:
 
 staff:
   title: "<primary>Modération"
+  not-here: "<error>Pas de mode staff sur ce serveur (passe par un serveur normal)."
+  "on": "<success>Mode staff activé.</success> <info>Tu es <accent>invisible</accent>, ton inventaire est mis de côté. <accent>/staff</accent> pour en sortir."
+  "off": "<info>Mode staff désactivé : ton inventaire t'est rendu, tu es de nouveau <accent>visible</accent>."
+  vanished: "<info>Tu es <accent>invisible"
+  visible: "<error>Tu es visible"
+  nobody: "<info>Personne d'autre en ligne"
+  offline: "<error><accent><player></accent> n'est pas connecté."
+  reports:
+    name: "<accent>Signalements <dark_gray>(<count>)"
+    lore: "<dark_gray>▸ <info>Les signalements des joueurs"
   search:
     name: "<accent>Chercher un joueur"
     lore: "<dark_gray>▸ <info>Sa fiche, connecté ou non"
@@ -126,6 +143,12 @@ player:
   alts:
     name: "<accent>Comptes liés"
     lore: "<dark_gray>▸ <info>Même connexion"
+  goto:
+    name: "<accent>Aller le voir"
+    lore: "<dark_gray>▸ <info>Téléporté près de lui, où qu'il soit"
+  freeze:
+    name: "<accent>Geler / dégeler"
+    lore: "<dark_gray>▸ <info>Il ne bouge plus, pour lui parler"
 
 motives:
   title: "<primary>Sanctionner <player>"
@@ -181,6 +204,16 @@ my:
   empty: "<success>Aucune sanction en cours"
 
 dialogs:
+  report-who:
+    title: "<primary>Signaler un joueur"
+    body: "<info>Son pseudo. Un faux signalement peut être sanctionné."
+    label: "Pseudo"
+    button: "Continuer"
+  report:
+    title: "<primary>Signaler <player>"
+    body: "<info>Motif : <accent><reason></accent><newline><dark_gray>Un détail aide le staff (quand, où, quoi). Facultatif."
+    label: "Détail (facultatif)"
+    button: "Signaler"
   search:
     title: "<primary>Chercher un joueur"
     body: "<info>Son pseudo (connecté ou non, sur tout le réseau)."
@@ -227,3 +260,62 @@ confirm:
     title: "<primary>Effacer la note"
     body: "<info><text>"
     button: "Effacer"
+
+freeze:
+  bar: "<error>Tu es gelé</error> <dark_gray>· <info>ne te déconnecte pas, un membre du staff va te parler"
+  frozen: "<error>Tu es gelé par le staff.</error> <info>Ne te déconnecte pas : un membre du staff va te parler en message privé."
+  unfrozen: "<success>Tu n'es plus gelé.</success>"
+  no-command: "<error>Tu es gelé : seuls les messages privés sont possibles."
+  done: "<success>✔</success> <info><accent><player></accent> est gelé."
+  undone: "<success>✔</success> <info><accent><player></accent> n'est plus gelé."
+
+# Les outils du mode staff (barre d'action)
+staff-tool:
+  profile:
+    name: "<accent>Fiche du joueur"
+    lore: "<dark_gray>▸ <info>Clic droit sur un joueur"
+  freeze:
+    name: "<accent>Geler / dégeler"
+    lore: "<dark_gray>▸ <info>Clic droit sur un joueur"
+  random:
+    name: "<accent>Joueur au hasard"
+    lore: "<dark_gray>▸ <info>Clic droit : téléporté près d'un joueur du réseau"
+  vanish:
+    name: "<accent>Visible / invisible"
+    lore: "<dark_gray>▸ <info>Clic droit"
+  reports:
+    name: "<accent>Signalements"
+    lore: "<dark_gray>▸ <info>Clic droit"
+  leave:
+    name: "<error>Quitter le mode staff"
+    lore: "<dark_gray>▸ <info>Clic droit : ton inventaire est rendu"
+
+report:
+  title: "<primary>Signaler <player>"
+  head: "<accent><player>"
+  head-lore: "<dark_gray>▸ <info>Choisis le motif"
+  reason: "<accent><reason>"
+  click: "<dark_gray>▸ <info>Clic : choisir"
+  self: "<error>Tu ne peux pas te signaler toi-même."
+  cooldown: "<error>Attends un peu avant de signaler à nouveau."
+  sent: "<success>✔</success> <info>Signalement de <accent><player></accent> envoyé au staff. Merci !"
+  closed: "<success>✔</success> <info>Signalement de <accent><player></accent> traité."
+
+# Motifs de signalement (config.yml > reports.reasons)
+report-reason:
+  cheat: "Triche"
+  insult: "Insultes"
+  spam: "Spam"
+  grief: "Grief / vol"
+  scam: "Arnaque"
+  bug: "Exploitation de bug"
+  other: "Autre"
+
+reports:
+  title: "<primary>Signalements <dark_gray>(<count>)"
+  name: "<accent><player>"
+  reason: "<dark_gray>▸ <info>Motif : <accent><reason>"
+  details: "<dark_gray>▸ <info>« <text> »"
+  by: "<dark_gray>▸ <info>Par <accent><player></accent> le <accent><date></accent> <dark_gray>(<server>)"
+  click: "<dark_gray>▸ <info>Clic gauche : aller le voir · clic droit : traité · shift : sa fiche"
+  empty: "<success>Aucun signalement"
