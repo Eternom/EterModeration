@@ -1,0 +1,96 @@
+name: EterModeration
+version: '${version}'
+
+main: fr.eternom.eterModeration.Main
+api-version: '26.2'
+load: POSTWORLD
+authors: [ NadTum ]
+description: 'Modération du réseau : sanctions selon un barème, appels, alertes, journal du chat, comptes liés, filtre.'
+depend: [EterLib]
+
+commands:
+  mod:
+    description: Le menu de modération (ou la fiche d'un joueur).
+    usage: /mod [joueur]
+    aliases: [moderation, sanction]
+    permission: eter.mod.use
+  appel:
+    description: Tes sanctions, et faire appel.
+    usage: /appel
+    aliases: [appeal]
+    permission: eter.mod.appeal
+
+# Une permission par action : chaque grade du staff reçoit exactement ce qu'il peut faire (LuckPerms).
+permissions:
+  eter.mod.appeal:
+    description: Voir ses sanctions et faire appel (/appel).
+    default: true
+  eter.mod.use:
+    description: Ouvrir /mod et la fiche d'un joueur.
+    default: op
+  eter.mod.warn:
+    description: Donner un avertissement.
+    default: op
+  eter.mod.mute:
+    description: Rendre muet (chat et messages privés).
+    default: op
+  eter.mod.jail:
+    description: Envoyer en prison.
+    default: op
+  eter.mod.ban:
+    description: Bannir du réseau (cas très graves).
+    default: op
+  eter.mod.motive.*:
+    description: Utiliser tous les motifs du barème (sinon eter.mod.motive.<motif>, un par un).
+    default: op
+  eter.mod.free:
+    description: Sanction libre, hors barème (durée et raison au choix).
+    default: op
+  eter.mod.permanent:
+    description: Sanction libre définitive.
+    default: op
+  eter.mod.lift:
+    description: Lever une sanction en cours.
+    default: op
+  eter.mod.appeals:
+    description: Traiter les appels.
+    default: op
+  eter.mod.history:
+    description: Historique d'un joueur et dernières sanctions du réseau.
+    default: op
+  eter.mod.notes:
+    description: Lire, écrire et effacer les notes du staff.
+    default: op
+  eter.mod.chatlog:
+    description: Lire les derniers messages d'un joueur (chat et privés).
+    default: op
+  eter.mod.alts:
+    description: Voir les comptes liés (même connexion).
+    default: op
+  eter.mod.alerts:
+    description: Recevoir les alertes de modération du réseau.
+    default: op
+  eter.mod.bypass.filter:
+    description: Pas de filtre du chat.
+    default: op
+  eter.mod.*:
+    description: Toutes les permissions de modération.
+    default: op
+    children:
+      eter.mod.appeal: true
+      eter.mod.use: true
+      eter.mod.warn: true
+      eter.mod.mute: true
+      eter.mod.jail: true
+      eter.mod.ban: true
+      eter.mod.motive.*: true
+      eter.mod.free: true
+      eter.mod.permanent: true
+      eter.mod.lift: true
+      eter.mod.appeals: true
+      eter.mod.history: true
+      eter.mod.notes: true
+      eter.mod.chatlog: true
+      eter.mod.alts: true
+      eter.mod.alerts: true
+      eter.mod.bypass.filter: true

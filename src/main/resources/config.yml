@@ -1,0 +1,80 @@
+# ============================================================
+#  EterModeration : la modération du réseau
+# ============================================================
+#
+#  À installer sur TOUS les serveurs Paper, avec EterVelocityModeration sur le proxy (c'est lui qui garde les
+#  prisonniers en prison et refuse les bannis). Les sanctions sont dans la base commune : une sanction donnée sur
+#  un serveur vaut partout. Tout se fait dans /mod (staff) et /appel (joueurs).
+#  Une permission par action (voir le README) : chaque grade du staff reçoit seulement ce qu'il peut faire.
+#  Les textes (noms des motifs compris) sont dans lang/. Toute modification nécessite un redémarrage du serveur.
+
+# Le barème : chaque motif a ses étapes, de la première fois à la récidive ; au-delà de la dernière, la dernière
+# se répète. Une étape : « warn », « mute 10m », « jail 3d », « ban perm » (s, m, h, d, w ; perm = définitive).
+# Une sanction levée (erreur, appel accepté) ne compte pas pour la récidive.
+# Utiliser un motif : eter.mod.motive.<motif> ET la permission du type de l'étape (eter.mod.mute...).
+# Nom affiché : lang/<langue>.yml > motive.<motif>. icon : l'objet dans le menu.
+motives:
+  spam:
+    icon: PAPER
+    steps: [warn, mute 10m, mute 1h, mute 1d]
+  insult:
+    icon: BLAZE_POWDER
+    steps: [warn, mute 1h, mute 1d, jail 1d]
+  threat:
+    icon: SKELETON_SKULL
+    steps: [mute 1d, mute 7d, jail 7d]
+  advertising:
+    icon: OAK_SIGN
+    steps: [mute 1d, jail 3d, jail 14d]
+  inappropriate:
+    icon: NAME_TAG
+    steps: [warn, jail 1d, jail 7d]
+  grief:
+    icon: FLINT_AND_STEEL
+    steps: [jail 1d, jail 7d, jail perm]
+  cheat:
+    icon: DIAMOND_PICKAXE
+    steps: [jail 7d, jail 30d, jail perm]
+  exploit:
+    icon: COMMAND_BLOCK
+    steps: [jail 3d, jail 14d, jail perm]
+  # Les seuls cas de ban : s'évader de prison (triche, faille) ou revenir avec un autre compte.
+  escape:
+    icon: TNT
+    steps: [ban perm]
+  evasion:
+    icon: PLAYER_HEAD
+    steps: [ban perm]
+
+# Commandes de messages privés : bloquées pour un joueur muet, filtrées (mots interdits) et gardées dans le journal.
+private-commands: [msg, tell, w, m, whisper, pm, r, reply]
+
+# Journal du chat (chat et messages privés), consultable par le staff (eter.mod.chatlog).
+chat-log:
+  # Messages gardés ce nombre de jours, puis effacés.
+  days: 30
+
+# Filtre du chat. Dispense : eter.mod.bypass.filter.
+filter:
+  enabled: true
+  spam:
+    # Plus de max-messages en seconds secondes : bloqué.
+    max-messages: 4
+    seconds: 6
+    # Le même message deux fois de suite : bloqué.
+    block-repeat: true
+  caps:
+    # Au moins min-length lettres et plus de max-percent % de majuscules : bloqué.
+    min-length: 8
+    max-percent: 70
+  # Mots interdits, cherchés en mot entier (sans accents, chiffres remis en lettres : « c0nn4rd » = « connard »).
+  # Un groupe de mots est accepté (« nique ta mere »). Chat et messages privés.
+  words: [connard, connasse, salope, pute, encule, fdp, ntm, nique ta mere, fils de pute, motherfucker, fuck you, bitch]
+  # Un mot interdit : message bloqué et cette sanction du barème tout de suite (vide = seulement bloqué).
+  word-motive: insult
+  # Spam, répétition, majuscules : message bloqué ; au strikes-ième en strikes-minutes minutes, cette sanction.
+  spam-motive: spam
+  strikes: 3
+  strikes-minutes: 10
+  # Auteur des sanctions du filtre dans l'historique.
+  staff-name: Filter

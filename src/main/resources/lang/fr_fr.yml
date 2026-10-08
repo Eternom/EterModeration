@@ -1,0 +1,229 @@
+# Messages d'EterModeration, format MiniMessage : https://docs.advntr.dev/minimessage/format
+# Balises de la palette (EterLib/config.yml > language.colors) : <primary> <accent> <info> <error> <success>
+# Une clé absente reprend le texte intégré au plugin : tu peux ne garder que les lignes que tu modifies.
+# Le préfixe des messages (« Core ») est commun à tous les plugins : EterLib/config.yml > language.prefix.
+
+# Les types de sanction et les motifs du barème (config.yml > motives : un nom par motif).
+type:
+  warn: "Avertissement"
+  mute: "Mute"
+  jail: "Prison"
+  ban: "Ban"
+motive-free: "Sanction libre"
+motive:
+  spam: "Spam / flood"
+  insult: "Insultes / irrespect"
+  threat: "Menaces"
+  advertising: "Publicité"
+  inappropriate: "Contenu inapproprié"
+  grief: "Grief / vol"
+  cheat: "Triche"
+  exploit: "Exploitation de bug"
+  escape: "Évasion de prison"
+  evasion: "Contournement de sanction"
+length:
+  permanent: "définitive"
+
+sanction:
+  no-permission: "<error>Tu n'as pas la permission pour cette action."
+  reason-required: "<error>Une sanction libre doit avoir une raison."
+  bad-duration: "<error>Durée illisible : <accent>30m</accent>, <accent>2h</accent>, <accent>3d</accent>, <accent>2w</accent> ou <accent>perm</accent>."
+  self: "<error>Tu ne peux pas te sanctionner toi-même."
+  given: "<success>✔</success> <info><accent><type></accent> pour <accent><player></accent> (<motive>)."
+  lifted: "<success>✔</success> <info>Sanction de <accent><player></accent> levée."
+  already-lifted: "<error>Cette sanction est déjà levée."
+  # Icône d'une sanction dans les menus
+  name: "<primary><type></primary> <dark_gray>#<id> · <info><player>"
+  motive: "<dark_gray>▸ <info>Motif : <accent><motive>"
+  reason: "<dark_gray>▸ <info>Raison : <accent><reason>"
+  by: "<dark_gray>▸ <info>Par <accent><staff></accent> le <accent><date></accent> <dark_gray>(<server>)"
+  date: "<dark_gray>▸ <info>Le <accent><date>"
+  length: "<dark_gray>▸ <info>Durée : <accent><time>"
+  status-active: "<error>● <info>En cours : encore <accent><time>"
+  status-over: "<dark_gray>● Terminée"
+  status-lifted: "<success>●</success> <info>Levée par <accent><staff>"
+
+# Ce que reçoit le joueur sanctionné (où qu'il soit sur le réseau)
+notify:
+  warn: "<error>Avertissement</error> <info>pour <accent><motive></accent>. <reason> <dark_gray>Le prochain sera plus lourd. Tes sanctions : <click:run_command:'/appel'><accent>/appel</accent></click>"
+  mute: "<error>Tu es muet pour <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Ni chat ni messages privés. Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
+  jail: "<error>Tu es envoyé en prison pour <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
+  ban: "<error>Tu es banni du réseau</error> <info>(<accent><motive></accent>). <reason>"
+  lifted: "<success>Ta sanction (<type>) a été levée.</success>"
+  appeal-accepted: "<success>Ton appel est accepté : ta sanction est levée.</success> <info>Réponse : <accent><answer>"
+  appeal-refused: "<error>Ton appel est refusé.</error> <info>Réponse : <accent><answer>"
+
+mute:
+  blocked: "<error>Tu es muet encore <accent><time></accent> (<motive>).</error> <dark_gray>Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
+
+filter:
+  spam: "<error>Doucement : trop de messages d'un coup."
+  repeat: "<error>Inutile de répéter le même message."
+  caps: "<error>Moins de majuscules, s'il te plaît."
+  word: "<error>Ce message contient un mot interdit."
+
+appeal:
+  too-short: "<error>Explique-toi un peu plus (10 caractères au moins)."
+  sent: "<success>✔</success> <info>Appel envoyé : le staff te répondra ici, ou dans <accent>/appel</accent>."
+  already: "<error>Tu as déjà fait appel de cette sanction."
+  already-answered: "<error>Cet appel a déjà été traité."
+  answered-accepted: "<success>✔</success> <info>Appel de <accent><player></accent> accepté : sanction levée."
+  answered-refused: "<success>✔</success> <info>Appel de <accent><player></accent> refusé."
+
+# Alertes au staff (eter.mod.alerts), sur tout le réseau
+alert:
+  prefix: "<error>[Mod]</error> "
+  given: "<accent><staff></accent> <info>→ <accent><player></accent> : <type> <time> <dark_gray>(<motive>) <reason>"
+  lifted: "<accent><staff></accent> <info>a levé : <accent><player></accent> <dark_gray>(<type>)"
+  filter: "<info>Mot interdit de <accent><player></accent> : <dark_gray><message>"
+  appeal: "<info>Nouvel appel de <accent><player></accent> <dark_gray>(<type>)</dark_gray> : <click:run_command:'/mod'><accent>/mod</accent></click>"
+  appeal-accepted: "<accent><staff></accent> <info>a accepté l'appel de <accent><player>"
+  appeal-refused: "<accent><staff></accent> <info>a refusé l'appel de <accent><player>"
+
+chatlog:
+  empty: "<info>Aucun message gardé de <accent><player></accent>."
+  header: "<info>Derniers messages de <accent><player></accent> :"
+  line: "<dark_gray><date> [<server>]</dark_gray> <info><message>"
+
+menu:
+  locked: "<error>● <info>Permission manquante"
+  back-to-staff: "<accent>« Modération"
+  back-to-player: "<accent>« Fiche de <player>"
+
+staff:
+  title: "<primary>Modération"
+  search:
+    name: "<accent>Chercher un joueur"
+    lore: "<dark_gray>▸ <info>Sa fiche, connecté ou non"
+  appeals:
+    name: "<accent>Appels <dark_gray>(<count>)"
+    lore: "<dark_gray>▸ <info>Les appels à traiter"
+  recent:
+    name: "<accent>Dernières sanctions"
+    lore: "<dark_gray>▸ <info>Sur tout le réseau"
+
+player:
+  title: "<primary>Fiche de <player>"
+  name: "<accent><player>"
+  online: "<success>●</success> <info>Connecté sur <accent><server>"
+  offline: "<dark_gray>● <info>Vu le <accent><date>"
+  first-seen: "<dark_gray>▸ <info>Arrivé le <accent><date>"
+  never-seen: "<dark_gray>● <info>Jamais vu sur le réseau"
+  clean: "<success>●</success> <info>Aucune sanction en cours"
+  active: "<error>●</error> <info><type> : encore <accent><time>"
+  sanction:
+    name: "<accent>Sanctionner"
+    lore: "<dark_gray>▸ <info>Selon le barème, la peine affichée avant"
+  history:
+    name: "<accent>Historique"
+    lore: "<dark_gray>▸ <info>Ses sanctions, en lever une"
+  notes:
+    name: "<accent>Notes du staff"
+    lore: "<dark_gray>▸ <info>Invisibles pour le joueur"
+  chat:
+    name: "<accent>Derniers messages"
+    lore: "<dark_gray>▸ <info>Chat et messages privés, dans ton chat"
+  alts:
+    name: "<accent>Comptes liés"
+    lore: "<dark_gray>▸ <info>Même connexion"
+
+motives:
+  title: "<primary>Sanctionner <player>"
+  name: "<accent><motive>"
+  next: "<dark_gray>▸ <info>Peine : <accent><type> <time>"
+  count: "<dark_gray>▸ <info>Déjà sanctionné pour ce motif : <accent><count></accent> fois"
+  click: "<dark_gray>▸ <info>Clic : confirmer"
+  free:
+    name: "<accent><type> libre"
+    lore: "<dark_gray>▸ <info>Hors barème : durée et raison au choix"
+
+history:
+  title: "<primary>Historique de <player> <dark_gray>(<count>)"
+  click-lift: "<dark_gray>▸ <info>Clic : lever la sanction"
+  empty: "<success>Aucune sanction"
+
+notes:
+  title: "<primary>Notes sur <player>"
+  name: "<accent><staff></accent> <dark_gray>· <date>"
+  text: "<info><text>"
+  click-delete: "<dark_gray>▸ <info>Clic droit : effacer"
+  add:
+    name: "<accent>Ajouter une note"
+    lore: "<dark_gray>▸ <info>Visible du staff seulement"
+
+alts:
+  title: "<primary>Comptes liés à <player>"
+  name: "<accent><player>"
+  last-seen: "<dark_gray>▸ <info>Vu le <accent><date>"
+  click: "<dark_gray>▸ <info>Clic : sa fiche"
+  empty: "<success>Aucun compte lié"
+  info:
+    name: "<accent>À savoir"
+    lore: "<info>Même connexion ≠ même personne (famille, colocation) : un indice, pas une preuve. L'adresse n'est jamais gardée."
+
+recent:
+  title: "<primary>Dernières sanctions"
+  click: "<dark_gray>▸ <info>Clic : la fiche du joueur"
+
+appeals:
+  title: "<primary>Appels <dark_gray>(<count>)"
+  text: "<dark_gray>▸ <info>Appel du <accent><date></accent> : <accent><text>"
+  click: "<dark_gray>▸ <info>Clic gauche : accepter · clic droit : refuser · shift : sa fiche"
+  empty: "<success>Aucun appel à traiter"
+
+my:
+  title: "<primary>Mes sanctions"
+  click: "<dark_gray>▸ <info>Clic : faire appel (une seule fois)"
+  appeal-open: "<accent>● <info>Appel en cours d'examen"
+  appeal-accepted: "<success>●</success> <info>Appel accepté"
+  appeal-refused: "<error>●</error> <info>Appel refusé"
+  answer: "<dark_gray>▸ <info>Réponse : <accent><answer>"
+  empty: "<success>Aucune sanction en cours"
+
+dialogs:
+  search:
+    title: "<primary>Chercher un joueur"
+    body: "<info>Son pseudo (connecté ou non, sur tout le réseau)."
+    label: "Pseudo"
+    button: "Ouvrir sa fiche"
+  give:
+    title: "<primary><type> pour <player>"
+    body: "<info>Motif : <accent><motive></accent><newline>Peine : <accent><type> <time></accent><newline><dark_gray>La raison est facultative (précision, preuve)."
+    label: "Raison (facultative)"
+    button: "Sanctionner"
+  free:
+    title: "<primary><type> libre pour <player>"
+    body: "<info>Hors barème. Durée : <accent>30m</accent>, <accent>2h</accent>, <accent>3d</accent>, <accent>2w</accent> ou <accent>perm</accent>."
+    duration: "Durée"
+    reason: "Raison"
+    button: "Sanctionner"
+  note:
+    title: "<primary>Note sur <player>"
+    body: "<info>Visible du staff seulement."
+    label: "Note"
+    button: "Ajouter"
+  accept:
+    title: "<primary>Accepter l'appel de <player>"
+    body: "<info>La sanction (<accent><type></accent>) sera levée. Un mot pour le joueur ?"
+    label: "Réponse"
+    button: "Accepter"
+  refuse:
+    title: "<primary>Refuser l'appel de <player>"
+    body: "<info>La sanction (<accent><type></accent>) reste. Explique pourquoi au joueur."
+    label: "Réponse"
+    button: "Refuser"
+  appeal:
+    title: "<primary>Faire appel"
+    body: "<info>Sanction : <accent><type></accent><newline>Explique calmement pourquoi elle est injuste ou trop lourde. <dark_gray>Un seul appel par sanction."
+    label: "Ton appel"
+    button: "Envoyer"
+
+confirm:
+  lift:
+    title: "<primary>Lever la sanction #<id>"
+    body: "<info><accent><type></accent> de <accent><player></accent> : elle prend fin tout de suite et ne compte plus pour la récidive."
+    button: "Lever"
+  delete-note:
+    title: "<primary>Effacer la note"
+    body: "<info><text>"
+    button: "Effacer"

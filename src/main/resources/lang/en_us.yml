@@ -1,0 +1,226 @@
+# EterModeration messages, MiniMessage format: https://docs.advntr.dev/minimessage/format
+# Palette tags (EterLib/config.yml > language.colors): <primary> <accent> <info> <error> <success>
+# A missing key falls back to the text bundled in the plugin: you can keep only the lines you change.
+# The message prefix ("Core") is shared by all plugins: EterLib/config.yml > language.prefix.
+
+# Sanction types and the scale's motives (config.yml > motives: one name per motive).
+type:
+  warn: "Warning"
+  mute: "Mute"
+  jail: "Jail"
+  ban: "Ban"
+motive-free: "Free sanction"
+motive:
+  spam: "Spam / flood"
+  insult: "Insults / disrespect"
+  threat: "Threats"
+  advertising: "Advertising"
+  inappropriate: "Inappropriate content"
+  grief: "Grief / theft"
+  cheat: "Cheating"
+  exploit: "Bug abuse"
+  escape: "Prison escape"
+  evasion: "Sanction evasion"
+length:
+  permanent: "permanent"
+
+sanction:
+  no-permission: "<error>You don't have permission for this action."
+  reason-required: "<error>A free sanction needs a reason."
+  bad-duration: "<error>Unreadable duration: <accent>30m</accent>, <accent>2h</accent>, <accent>3d</accent>, <accent>2w</accent> or <accent>perm</accent>."
+  self: "<error>You can't sanction yourself."
+  given: "<success>✔</success> <info><accent><type></accent> for <accent><player></accent> (<motive>)."
+  lifted: "<success>✔</success> <info>Sanction of <accent><player></accent> lifted."
+  already-lifted: "<error>This sanction is already lifted."
+  name: "<primary><type></primary> <dark_gray>#<id> · <info><player>"
+  motive: "<dark_gray>▸ <info>Motive: <accent><motive>"
+  reason: "<dark_gray>▸ <info>Reason: <accent><reason>"
+  by: "<dark_gray>▸ <info>By <accent><staff></accent> on <accent><date></accent> <dark_gray>(<server>)"
+  date: "<dark_gray>▸ <info>On <accent><date>"
+  length: "<dark_gray>▸ <info>Length: <accent><time>"
+  status-active: "<error>● <info>Active: <accent><time></accent> left"
+  status-over: "<dark_gray>● Over"
+  status-lifted: "<success>●</success> <info>Lifted by <accent><staff>"
+
+notify:
+  warn: "<error>Warning</error> <info>for <accent><motive></accent>. <reason> <dark_gray>The next one will be heavier. Your sanctions: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
+  mute: "<error>You are muted for <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>No chat, no private messages. Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
+  jail: "<error>You are sent to jail for <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
+  ban: "<error>You are banned from the network</error> <info>(<accent><motive></accent>). <reason>"
+  lifted: "<success>Your sanction (<type>) has been lifted.</success>"
+  appeal-accepted: "<success>Your appeal is accepted: your sanction is lifted.</success> <info>Answer: <accent><answer>"
+  appeal-refused: "<error>Your appeal is refused.</error> <info>Answer: <accent><answer>"
+
+mute:
+  blocked: "<error>You are muted for <accent><time></accent> more (<motive>).</error> <dark_gray>Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
+
+filter:
+  spam: "<error>Slow down: too many messages at once."
+  repeat: "<error>No need to repeat the same message."
+  caps: "<error>Fewer capital letters, please."
+  word: "<error>This message contains a forbidden word."
+
+appeal:
+  too-short: "<error>Explain a bit more (at least 10 characters)."
+  sent: "<success>✔</success> <info>Appeal sent: staff will answer here, or in <accent>/appeal</accent>."
+  already: "<error>You already appealed this sanction."
+  already-answered: "<error>This appeal was already handled."
+  answered-accepted: "<success>✔</success> <info>Appeal of <accent><player></accent> accepted: sanction lifted."
+  answered-refused: "<success>✔</success> <info>Appeal of <accent><player></accent> refused."
+
+alert:
+  prefix: "<error>[Mod]</error> "
+  given: "<accent><staff></accent> <info>→ <accent><player></accent>: <type> <time> <dark_gray>(<motive>) <reason>"
+  lifted: "<accent><staff></accent> <info>lifted: <accent><player></accent> <dark_gray>(<type>)"
+  filter: "<info>Forbidden word from <accent><player></accent>: <dark_gray><message>"
+  appeal: "<info>New appeal from <accent><player></accent> <dark_gray>(<type>)</dark_gray>: <click:run_command:'/mod'><accent>/mod</accent></click>"
+  appeal-accepted: "<accent><staff></accent> <info>accepted the appeal of <accent><player>"
+  appeal-refused: "<accent><staff></accent> <info>refused the appeal of <accent><player>"
+
+chatlog:
+  empty: "<info>No message kept from <accent><player></accent>."
+  header: "<info>Last messages of <accent><player></accent>:"
+  line: "<dark_gray><date> [<server>]</dark_gray> <info><message>"
+
+menu:
+  locked: "<error>● <info>Missing permission"
+  back-to-staff: "<accent>« Moderation"
+  back-to-player: "<accent>« <player>'s profile"
+
+staff:
+  title: "<primary>Moderation"
+  search:
+    name: "<accent>Find a player"
+    lore: "<dark_gray>▸ <info>Their profile, online or not"
+  appeals:
+    name: "<accent>Appeals <dark_gray>(<count>)"
+    lore: "<dark_gray>▸ <info>Appeals to handle"
+  recent:
+    name: "<accent>Latest sanctions"
+    lore: "<dark_gray>▸ <info>Across the network"
+
+player:
+  title: "<primary><player>'s profile"
+  name: "<accent><player>"
+  online: "<success>●</success> <info>Online on <accent><server>"
+  offline: "<dark_gray>● <info>Last seen <accent><date>"
+  first-seen: "<dark_gray>▸ <info>Joined <accent><date>"
+  never-seen: "<dark_gray>● <info>Never seen on the network"
+  clean: "<success>●</success> <info>No active sanction"
+  active: "<error>●</error> <info><type>: <accent><time></accent> left"
+  sanction:
+    name: "<accent>Sanction"
+    lore: "<dark_gray>▸ <info>By the scale, penalty shown first"
+  history:
+    name: "<accent>History"
+    lore: "<dark_gray>▸ <info>Their sanctions, lift one"
+  notes:
+    name: "<accent>Staff notes"
+    lore: "<dark_gray>▸ <info>Hidden from the player"
+  chat:
+    name: "<accent>Last messages"
+    lore: "<dark_gray>▸ <info>Chat and private messages, in your chat"
+  alts:
+    name: "<accent>Linked accounts"
+    lore: "<dark_gray>▸ <info>Same connection"
+
+motives:
+  title: "<primary>Sanction <player>"
+  name: "<accent><motive>"
+  next: "<dark_gray>▸ <info>Penalty: <accent><type> <time>"
+  count: "<dark_gray>▸ <info>Already sanctioned for this: <accent><count></accent> time(s)"
+  click: "<dark_gray>▸ <info>Click: confirm"
+  free:
+    name: "<accent>Free <type>"
+    lore: "<dark_gray>▸ <info>Outside the scale: any length and reason"
+
+history:
+  title: "<primary><player>'s history <dark_gray>(<count>)"
+  click-lift: "<dark_gray>▸ <info>Click: lift the sanction"
+  empty: "<success>No sanction"
+
+notes:
+  title: "<primary>Notes on <player>"
+  name: "<accent><staff></accent> <dark_gray>· <date>"
+  text: "<info><text>"
+  click-delete: "<dark_gray>▸ <info>Right click: delete"
+  add:
+    name: "<accent>Add a note"
+    lore: "<dark_gray>▸ <info>Staff only"
+
+alts:
+  title: "<primary>Accounts linked to <player>"
+  name: "<accent><player>"
+  last-seen: "<dark_gray>▸ <info>Last seen <accent><date>"
+  click: "<dark_gray>▸ <info>Click: their profile"
+  empty: "<success>No linked account"
+  info:
+    name: "<accent>Good to know"
+    lore: "<info>Same connection ≠ same person (family, roommates): a hint, not a proof. The address is never stored."
+
+recent:
+  title: "<primary>Latest sanctions"
+  click: "<dark_gray>▸ <info>Click: the player's profile"
+
+appeals:
+  title: "<primary>Appeals <dark_gray>(<count>)"
+  text: "<dark_gray>▸ <info>Appeal of <accent><date></accent>: <accent><text>"
+  click: "<dark_gray>▸ <info>Left click: accept · right click: refuse · shift: profile"
+  empty: "<success>No appeal to handle"
+
+my:
+  title: "<primary>My sanctions"
+  click: "<dark_gray>▸ <info>Click: appeal (only once)"
+  appeal-open: "<accent>● <info>Appeal under review"
+  appeal-accepted: "<success>●</success> <info>Appeal accepted"
+  appeal-refused: "<error>●</error> <info>Appeal refused"
+  answer: "<dark_gray>▸ <info>Answer: <accent><answer>"
+  empty: "<success>No active sanction"
+
+dialogs:
+  search:
+    title: "<primary>Find a player"
+    body: "<info>Their name (online or not, across the network)."
+    label: "Name"
+    button: "Open profile"
+  give:
+    title: "<primary><type> for <player>"
+    body: "<info>Motive: <accent><motive></accent><newline>Penalty: <accent><type> <time></accent><newline><dark_gray>The reason is optional (detail, proof)."
+    label: "Reason (optional)"
+    button: "Sanction"
+  free:
+    title: "<primary>Free <type> for <player>"
+    body: "<info>Outside the scale. Length: <accent>30m</accent>, <accent>2h</accent>, <accent>3d</accent>, <accent>2w</accent> or <accent>perm</accent>."
+    duration: "Length"
+    reason: "Reason"
+    button: "Sanction"
+  note:
+    title: "<primary>Note on <player>"
+    body: "<info>Visible to staff only."
+    label: "Note"
+    button: "Add"
+  accept:
+    title: "<primary>Accept <player>'s appeal"
+    body: "<info>The sanction (<accent><type></accent>) will be lifted. A word for the player?"
+    label: "Answer"
+    button: "Accept"
+  refuse:
+    title: "<primary>Refuse <player>'s appeal"
+    body: "<info>The sanction (<accent><type></accent>) stays. Explain why to the player."
+    label: "Answer"
+    button: "Refuse"
+  appeal:
+    title: "<primary>Appeal"
+    body: "<info>Sanction: <accent><type></accent><newline>Calmly explain why it is unfair or too heavy. <dark_gray>Only one appeal per sanction."
+    label: "Your appeal"
+    button: "Send"
+
+confirm:
+  lift:
+    title: "<primary>Lift sanction #<id>"
+    body: "<info><accent><type></accent> of <accent><player></accent>: it ends now and no longer counts for repeat offences."
+    button: "Lift"
+  delete-note:
+    title: "<primary>Delete the note"
+    body: "<info><text>"
+    button: "Delete"
