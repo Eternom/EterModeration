@@ -1,13 +1,21 @@
 plugins {
     id("java-library")
+    id("maven-publish")
 }
 
 repositories {
     // PaperMC en premier : Maven Central limite les téléchargements (429)
     maven("https://repo.papermc.io/repository/maven-public/")
     mavenCentral()
-    // EterLib : compilé depuis GitHub
-    maven("https://jitpack.io")
+    // Plugins Eter (EterLib, API des autres plugins) : le jar de leur release GitHub (publiée par la CI à chaque tag)
+    ivy {
+        url = uri("https://github.com/Eternom/")
+        patternLayout { artifact("[module]/releases/download/[revision]/[module]-[revision].[ext]") }
+        metadataSources { artifact() }
+        content { includeGroup("com.github.Eternom") }
+    }
+    // Autres dépendances publiées sur JitPack (VaultAPI...)
+    maven("https://jitpack.io") { content { excludeGroup("com.github.Eternom") } }
     // Repli : EterLib publié sur cette machine (`gradlew publishToMavenLocal` dans EterLib), pour tester avant de pousser
     mavenLocal()
 }
@@ -16,7 +24,13 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.129-stable")
 
     // Socle commun : base, langues, menus, serveurs du réseau (plugin EterLib installé sur le serveur)
-    compileOnly("com.github.Eternom:EterLib:1.9.1")
+    compileOnly("com.github.Eternom:EterLib:1.10.3")
+    // Fiche du joueur : clan (API d'EterClan)
+    compileOnly("com.github.Eternom:EterClan:1.1.0")
+    // Fiche du joueur : homes (API d'EterHome)
+    compileOnly("com.github.Eternom:EterHome:1.2.1")
+    // Fiche du joueur : inventaire (API d'EterSync)
+    compileOnly("com.github.Eternom:EterSync:1.1.0")
 }
 
 java {
@@ -51,3 +65,13 @@ val deployPlugin by tasks.registering(Copy::class) {
     }
 }
 tasks.build { finalizedBy(deployPlugin) }
+
+// Publié pour les autres plugins (son API, fr.eternom.eterModeration.api) : compileOnly("com.github.Eternom:EterModeration:<tag>")
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "EterModeration"
+            from(components["java"])
+        }
+    }
+}

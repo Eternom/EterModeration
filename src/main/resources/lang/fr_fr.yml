@@ -143,6 +143,13 @@ player:
   alts:
     name: "<accent>Comptes liés"
     lore: "<dark_gray>▸ <info>Même connexion"
+  clan: "<dark_gray>▸ <info>Clan : <accent><clan>"
+  homes:
+    name: "<accent>Homes"
+    lore: "<dark_gray>▸ <info>Ses homes (EterHome)"
+  inventory:
+    name: "<accent>Inventaire"
+    lore: "<dark_gray>▸ <info>Ses sauvegardes, en lecture seule (EterSync)"
   goto:
     name: "<accent>Aller le voir"
     lore: "<dark_gray>▸ <info>Téléporté près de lui, où qu'il soit"

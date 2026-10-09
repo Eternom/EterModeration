@@ -37,6 +37,8 @@ class PlayerMenu implements Menu {
     private static final int CHAT = 32;
     private static final int ALTS = 33;
     private static final int FREEZE = 34;
+    private static final int HOMES = 39;
+    private static final int INVENTORY = 41;
     private static final int BACK = 49;
 
     private final ModGui gui;
@@ -76,6 +78,8 @@ class PlayerMenu implements Menu {
                 gui.openAlts(player, target);
             }
             case GOTO -> gui.goTo(player, target);
+            case HOMES -> Integrations.openHomes(player, target);
+            case INVENTORY -> Integrations.openInventory(player, target);
             case FREEZE -> {
                 if (online()) {
                     gui.freeze().toggle(player, target);
@@ -107,6 +111,7 @@ class PlayerMenu implements Menu {
                     : messages.get(viewer, "player.offline", "date", Labels.date(network.lastSeen())));
             lore.add(messages.get(viewer, "player.first-seen", "date", Labels.date(network.firstSeen())));
         }, () -> lore.add(messages.get(viewer, "player.never-seen")));
+        profile.clan().ifPresent(clan -> lore.add(messages.get(viewer, "player.clan", "clan", clan)));
         if (profile.active().isEmpty()) {
             lore.add(messages.get(viewer, "player.clean"));
         }
@@ -121,6 +126,14 @@ class PlayerMenu implements Menu {
         inventory.setItem(NOTES, button(Material.WRITABLE_BOOK, "player.notes", ModGui.NOTES));
         inventory.setItem(CHAT, button(Material.OAK_SIGN, "player.chat", ModGui.CHATLOG));
         inventory.setItem(ALTS, button(Material.PLAYER_HEAD, "player.alts", ModGui.ALTS));
+        if (Integrations.has("EterHome")) {
+            inventory.setItem(HOMES, Items.item(Material.RED_BED, messages.get(viewer, "player.homes.name"),
+                    List.of(messages.get(viewer, "player.homes.lore"))));
+        }
+        if (Integrations.has("EterSync")) {
+            inventory.setItem(INVENTORY, Items.item(Material.CHEST, messages.get(viewer, "player.inventory.name"),
+                    List.of(messages.get(viewer, "player.inventory.lore"))));
+        }
         if (online()) {
             inventory.setItem(GOTO, button(Material.ENDER_PEARL, "player.goto", StaffMode.PERMISSION));
             inventory.setItem(FREEZE, button(Material.PACKED_ICE, "player.freeze", Freeze.PERMISSION));

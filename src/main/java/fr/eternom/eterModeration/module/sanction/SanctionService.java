@@ -107,6 +107,16 @@ public class SanctionService {
         });
     }
 
+    /**
+     * Sanction donnée par un autre plugin (API) au nom de author, hors barème : enregistrée tout de suite, puis appliquée
+     * et annoncée sur le thread principal. Bloquant (base) : hors du thread principal. Rend son numéro.
+     */
+    public long giveFromPlugin(Target target, SanctionType type, Duration duration, String reason, String author) {
+        Sanction sanction = record(target, type, duration, "", reason, author);
+        Bukkit.getScheduler().runTask(plugin, () -> announce(sanction, Bukkit.getConsoleSender()));
+        return sanction.id();
+    }
+
     private Sanction record(Target target, SanctionType type, Duration duration, String motive, String reason, String staffName) {
         long now = System.currentTimeMillis();
         long expiresAt = !type.lasts() ? now : duration == null ? 0 : now + duration.toMillis();

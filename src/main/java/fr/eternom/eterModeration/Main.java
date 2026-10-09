@@ -29,6 +29,9 @@ import fr.eternom.eterModeration.module.sanction.Motives.Motive;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
+import fr.eternom.eterModeration.api.ModerationApi;
+import fr.eternom.eterModeration.module.sanction.ModerationApiService;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
@@ -44,7 +47,7 @@ import java.util.Set;
 public final class Main extends JavaPlugin {
 
     /** Version minimale d'EterLib : invisibilité réseau (Vanish) depuis 1.9.0. */
-    private static final String REQUIRED_ETERLIB = "1.9.1";
+    private static final String REQUIRED_ETERLIB = "1.10.0";
     /** Préfixe des tables : etermod_sanctions, etermod_appeals, etermod_notes, etermod_chat, etermod_links, etermod_settings,
      * etermod_reports, etermod_staff_inventories. */
     private static final String TABLE_PREFIX = "etermod_";
@@ -107,6 +110,10 @@ public final class Main extends JavaPlugin {
                 getLogger().warning("Journal du chat non purgé : " + e.getMessage());
             }
         }, 20L * 60, DAY_TICKS);
+
+        // API pour les autres plugins (ModerationApi.get())
+        getServer().getServicesManager().register(ModerationApi.class, new ModerationApiService(sanctions, lib.getRedis()), this,
+                ServicePriority.Normal);
 
         new Commands(this);
         new Events(this);

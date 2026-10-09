@@ -55,7 +55,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class StaffMode implements Listener {
 
     public static final String PERMISSION = "eter.mod.staff";
-    private static final String KEY = "etermod:staff";
+    public static final String KEY = "etermod:staff";
     /** Après l'arrivée : laisser EterSync rendre l'inventaire avant de vérifier les outils. */
     private static final long JOIN_DELAY_TICKS = 60;
 

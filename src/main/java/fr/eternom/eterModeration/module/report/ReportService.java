@@ -1,5 +1,6 @@
 package fr.eternom.eterModeration.module.report;
 
+import fr.eternom.eterLib.helper.cache.Cooldowns;
 import fr.eternom.eterLib.helper.cache.NetworkBus;
 import fr.eternom.eterLib.helper.cache.RedisCache;
 import fr.eternom.eterLib.helper.message.Messages;
@@ -28,12 +29,11 @@ public class ReportService {
 
     private final JavaPlugin plugin;
     private final ReportRepository repository;
-    private final RedisCache redis;
     private final NetworkBus bus;
     private final StaffAlerts alerts;
     private final Messages messages;
     private final String server;
-    private final Duration cooldown;
+    private final Cooldowns cooldown;
     /** Motif -> icône, dans l'ordre de la config. */
     private final Map<String, Material> reasons = new LinkedHashMap<>();
 
@@ -41,12 +41,12 @@ public class ReportService {
                          Messages messages, String server, ConfigurationSection config) {
         this.plugin = plugin;
         this.repository = repository;
-        this.redis = redis;
         this.bus = bus;
         this.alerts = alerts;
         this.messages = messages;
         this.server = server;
-        this.cooldown = Duration.ofSeconds(config == null ? 60 : Math.max(0, config.getInt("cooldown-seconds", 60)));
+        this.cooldown = new Cooldowns(redis, "etermod:report-cooldown",
+                Duration.ofSeconds(config == null ? 60 : Math.max(0, config.getInt("cooldown-seconds", 60))));
         ConfigurationSection section = config == null ? null : config.getConfigurationSection("reasons");
         if (section != null) {
             for (String id : section.getKeys(false)) {
@@ -69,10 +69,9 @@ public class ReportService {
             return;
         }
         String trimmed = details.length() > 255 ? details.substring(0, 255) : details;
-        String key = "etermod:report-cooldown:" + reporter.getUniqueId();
         String reporterName = reporter.getName();
         Tasks.async(plugin, reporter, () -> {
-            if (!cooldown.isZero() && !redis.setIfAbsent(key, "1", cooldown)) {
+            if (!cooldown.tryStart(reporter.getUniqueId())) {
                 return false;
             }
             repository.add(reporter.getUniqueId(), reporterName, target.uuid(), target.name(), reason, trimmed, server);

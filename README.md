@@ -9,7 +9,7 @@ La vie en prison (travail, remise de peine...) n'est **pas** ici : elle viendra 
 
 ## Prérequis
 
-- **EterLib 1.9.1+** (`depend`) : base, Redis (bus réseau), invisibilité réseau (Vanish), langues, menus (cadre, Dialogs), joueurs du réseau.
+- **EterLib 1.10.0+** (`depend`) : base, Redis (bus réseau), invisibilité réseau (Vanish), langues, menus (cadre, Dialogs), joueurs du réseau.
 - **EterVelocityModeration 1.1.0+** sur le proxy (même base) : prison et ban, appliqués tout de suite.
 - **EterTab 1.1.13+** : les invisibles retirés de la liste Tab du réseau.
 - **EterChat 1.1.7+** : chat séparé des serveurs prison (`prison.server-prefix`).
@@ -50,7 +50,8 @@ Tout se fait dans les menus ; saisies et confirmations par des fenêtres (Dialog
 - **`/mod`** (staff) : chercher un joueur, les appels et les signalements à traiter, les dernières sanctions du réseau.
 - **`/mod <joueur>`** : sa fiche (connecté où, sanctions en cours) → sanctionner (motifs + sanctions libres),
   historique (lever), notes du staff, derniers messages (affichés dans le chat), comptes liés ; s'il est connecté :
-  aller le voir, le geler.
+  aller le voir, le geler. Et, demandés aux autres plugins par leurs API : son **clan** (EterClan), ses
+  **homes** (EterHome) et son **inventaire** en lecture seule (EterSync), chacun avec ses propres permissions.
 - **`/appel`** (joueurs) : ses sanctions en cours et ses avertissements, faire appel (une fois par sanction), l'état
   et la réponse du staff. Le joueur ne voit pas qui l'a sanctionné.
 - **`/report [joueur]`** (joueurs) : le motif dans un menu (`reports.reasons`), un détail facultatif ; un signalement
@@ -120,3 +121,16 @@ Les permissions des motifs sont créées au démarrage d'après la config (enfan
 
 `sanctions` (lue aussi par le proxy : `uuid`, `type` en majuscules, `expires_at` 0 = définitive, `lifted_at` 0 = en
 cours), `appeals`, `notes`, `chat`, `links`, `settings`, `reports`, `staff_inventories`.
+
+## API (pour les autres plugins)
+
+`fr.eternom.eterModeration.api.ModerationApi` (`ModerationApi.get()`) : personne d'autre ne lit les tables `etermod_*`
+ni ses clés Redis (`etermod:frozen`, `etermod:staff`...). Seule exception : EterVelocityModeration, sa moitié proxy, qui
+lit `etermod_sanctions` (le proxy ne peut pas appeler un plugin Paper au moment où un joueur se connecte).
+
+- `activeSanctions(uuid)`, `isMuted`, `isJailed`, `isFrozen`, `isInStaffMode` (bloquant) ;
+- `give(uuid, pseudo, type, durée, raison, auteur)` : une sanction hors barème au nom d'un autre plugin (ex : la prison
+  qui allonge une peine), appliquée et annoncée comme les autres.
+
+Ce qu'EterModeration demande aux autres : clan (`ClanApi`), homes (`HomeApi`), inventaire (`SyncApi`) pour la fiche ;
+chacune n'est appelée que si son plugin tourne sur ce serveur (`Integrations`).

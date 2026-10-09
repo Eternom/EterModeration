@@ -7,6 +7,7 @@ load: POSTWORLD
 authors: [ NadTum ]
 description: 'Modération du réseau : sanctions selon un barème, appels, alertes, journal du chat, comptes liés, filtre.'
 depend: [EterLib]
+softdepend: [EterSync, EterHome, EterClan]
 
 commands:
   mod:

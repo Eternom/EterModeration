@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Freeze implements Listener {
 
     public static final String PERMISSION = "eter.mod.freeze";
-    private static final String KEY = "etermod:frozen";
+    public static final String KEY = "etermod:frozen";
     private static final String CHANGED = "freeze";
 
     private final JavaPlugin plugin;

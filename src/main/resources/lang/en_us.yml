@@ -140,6 +140,13 @@ player:
   alts:
     name: "<accent>Linked accounts"
     lore: "<dark_gray>▸ <info>Same connection"
+  clan: "<dark_gray>▸ <info>Clan: <accent><clan>"
+  homes:
+    name: "<accent>Homes"
+    lore: "<dark_gray>▸ <info>Their homes (EterHome)"
+  inventory:
+    name: "<accent>Inventory"
+    lore: "<dark_gray>▸ <info>Their saves, read only (EterSync)"
   goto:
     name: "<accent>Go to them"
     lore: "<dark_gray>▸ <info>Teleported next to them, wherever they are"

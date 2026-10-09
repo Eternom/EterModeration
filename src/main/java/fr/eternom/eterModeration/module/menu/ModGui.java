@@ -65,7 +65,7 @@ public class ModGui {
     static final Material STAFF_FRAME = Material.RED_STAINED_GLASS_PANE;
 
     /** Ce que montre la fiche d'un joueur. */
-    record Profile(Target target, Optional<NetworkPlayer> network, List<Sanction> active) {
+    record Profile(Target target, Optional<NetworkPlayer> network, List<Sanction> active, Optional<String> clan) {
     }
 
     /** Les compteurs du menu /mod. */
@@ -116,7 +116,8 @@ public class ModGui {
     }
 
     public void openPlayer(Player staff, Target target) {
-        load(staff, () -> new Profile(target, players.get(target.uuid()), repository().active(target.uuid(), System.currentTimeMillis())),
+        load(staff, () -> new Profile(target, players.get(target.uuid()), repository().active(target.uuid(), System.currentTimeMillis()),
+                        Integrations.clan(target)),
                 profile -> new PlayerMenu(this, staff, profile).getInventory());
     }
 
