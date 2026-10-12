@@ -47,7 +47,7 @@ import java.util.Set;
 public final class Main extends JavaPlugin {
 
     /** Version minimale d'EterLib : invisibilité réseau (Vanish) depuis 1.9.0. */
-    private static final String REQUIRED_ETERLIB = "1.10.0";
+    private static final String REQUIRED_ETERLIB = "1.11.1";
     /** Préfixe des tables : etermod_sanctions, etermod_appeals, etermod_notes, etermod_chat, etermod_links, etermod_settings,
      * etermod_reports, etermod_staff_inventories. */
     private static final String TABLE_PREFIX = "etermod_";

@@ -9,7 +9,7 @@ La vie en prison (travail, remise de peine...) n'est **pas** ici : elle viendra 
 
 ## Prérequis
 
-- **EterLib 1.10.0+** (`depend`) : base, Redis (bus réseau), invisibilité réseau (Vanish), langues, menus (cadre, Dialogs), joueurs du réseau.
+- **EterLib 1.11.1+** (`depend`) : base, Redis (bus réseau), invisibilité réseau (Vanish), langues, menus (cadre, Dialogs, bouton Retour), joueurs du réseau.
 - **EterVelocityModeration 1.1.0+** sur le proxy (même base) : prison et ban, appliqués tout de suite.
 - **EterTab 1.1.13+** : les invisibles retirés de la liste Tab du réseau.
 - **EterChat 1.1.7+** : chat séparé des serveurs prison (`prison.server-prefix`).
@@ -56,6 +56,7 @@ Tout se fait dans les menus ; saisies et confirmations par des fenêtres (Dialog
   et la réponse du staff. Le joueur ne voit pas qui l'a sanctionné.
 - **`/report [joueur]`** (joueurs) : le motif dans un menu (`reports.reasons`), un détail facultatif ; un signalement
   par `reports.cooldown-seconds` (Redis, réseau). Le staff est alerté ; l'auteur est prévenu quand c'est traité.
+  Le bouton Retour de ces deux menus lance `menus.back-command` (« menu social » : le sous-menu Social de `/menu`).
 - **`/staff`** : le mode staff, sur tout le réseau (voir `staff`).
 
 ## Permissions : une par action

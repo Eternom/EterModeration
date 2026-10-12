@@ -96,3 +96,8 @@ reports:
 # (la prison n'a pas EterSync : l'inventaire rendu y resterait coincé).
 staff:
   blocked-servers: [prison]
+
+# Bouton Retour des menus des joueurs (/appel, /report) : la commande lancée ("menu social" : le sous-menu Social de
+# /menu), vide pour le menu central, "close" pour fermer.
+menus:
+  back-command: "menu social"

@@ -56,7 +56,7 @@ class MyAppealsMenu implements Menu {
             gui.askText(player, "appeal", 512, text -> gui.appeals().submit(player, sanction, text, () -> gui.openMyAppeals(player)),
                     () -> gui.openMyAppeals(player), "type", gui.labels().type(player, sanction.type()));
         } else if (slot == CLOSE) {
-            player.closeInventory();
+            gui.back().click(player);
         }
     }
 
@@ -94,6 +94,6 @@ class MyAppealsMenu implements Menu {
         if (shown.isEmpty()) {
             inventory.setItem(22, Items.item(Material.LIME_DYE, messages.get(viewer, "my.empty"), List.of()));
         }
-        inventory.setItem(CLOSE, Items.item(Material.BARRIER, messages.get(viewer, "menu.close"), List.of()));
+        inventory.setItem(CLOSE, gui.back().item(viewer));
     }
 }

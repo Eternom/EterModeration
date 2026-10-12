@@ -48,7 +48,7 @@ class ReportReasonsMenu implements Menu {
                     () -> player.openInventory(new ReportReasonsMenu(gui, player, target).getInventory()),
                     "player", target.name(), "reason", messages.plain(player, "report-reason." + reason));
         } else if (slot == CLOSE) {
-            player.closeInventory();
+            gui.back().click(player);
         }
     }
 
@@ -72,6 +72,6 @@ class ReportReasonsMenu implements Menu {
                     messages.get(viewer, "report.reason", "reason", messages.plain(viewer, "report-reason." + reason.getKey())),
                     List.of(messages.get(viewer, "report.click"))));
         }
-        inventory.setItem(CLOSE, Items.item(Material.BARRIER, messages.get(viewer, "menu.close"), List.of()));
+        inventory.setItem(CLOSE, gui.back().item(viewer));
     }
 }

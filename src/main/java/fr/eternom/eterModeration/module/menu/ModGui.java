@@ -2,6 +2,7 @@ package fr.eternom.eterModeration.module.menu;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import fr.eternom.eterLib.EterLib;
+import fr.eternom.eterLib.helper.gui.BackButton;
 import fr.eternom.eterLib.helper.gui.Dialogs;
 import fr.eternom.eterLib.helper.gui.Items;
 import fr.eternom.eterLib.helper.message.Messages;
@@ -337,6 +338,11 @@ public class ModGui {
 
     Messages messages() {
         return messages;
+    }
+
+    /** Retour des menus des joueurs (/appel, /report) : config.yml > menus.back-command (vide : menu central). */
+    BackButton back() {
+        return EterLib.get().backButton(plugin.getConfig().getString("menus.back-command", "menu social"));
     }
 
     Labels labels() {
