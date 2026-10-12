@@ -21,13 +21,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -298,7 +301,7 @@ public class StaffMode implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onDrop(PlayerDropItemEvent event) {
-        if (tool(event.getItemDrop().getItemStack()) != null) {
+        if (busy.contains(event.getPlayer().getUniqueId()) || tool(event.getItemDrop().getItemStack()) != null) {
             event.setCancelled(true);
         }
     }
@@ -306,7 +309,8 @@ public class StaffMode implements Listener {
     /** Un outil ne quitte pas l'inventaire du joueur (coffre, four...). */
     @EventHandler(ignoreCancelled = true)
     public void onClick(InventoryClickEvent event) {
-        if (event.getClickedInventory() != event.getWhoClicked().getInventory() && tool(event.getCursor()) != null
+        if (busy.contains(event.getWhoClicked().getUniqueId())
+                || event.getClickedInventory() != event.getWhoClicked().getInventory() && tool(event.getCursor()) != null
                 || event.isShiftClick() && tool(event.getCurrentItem()) != null
                 || event.getHotbarButton() >= 0 && event.getClickedInventory() != event.getWhoClicked().getInventory()
                 && tool(event.getWhoClicked().getInventory().getItem(event.getHotbarButton())) != null) {
@@ -314,9 +318,34 @@ public class StaffMode implements Listener {
         }
     }
 
+    /**
+     * Entrée ou sortie en cours : l'inventaire photographié en base n'est vidé qu'au retour de la base. Entre les deux, un
+     * objet jeté, posé, mangé ou rangé serait à la fois dans le monde et dans la photo (duplication) : tout est bloqué.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onDrag(InventoryDragEvent event) {
+        if (busy.contains(event.getWhoClicked().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlace(BlockPlaceEvent event) {
+        if (busy.contains(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onConsume(PlayerItemConsumeEvent event) {
+        if (busy.contains(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onPickup(EntityPickupItemEvent event) {
-        if (active.contains(event.getEntity().getUniqueId())) {
+        if (active.contains(event.getEntity().getUniqueId()) || busy.contains(event.getEntity().getUniqueId())) {
             event.setCancelled(true);
         }
     }

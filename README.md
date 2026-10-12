@@ -104,7 +104,9 @@ Les permissions des motifs sont créées au démarrage d'après la config (enfan
   pour les mots interdits.
 - **`staff`** :
   - **mode staff** (`StaffMode`, `/staff`) : l'inventaire part en base (`etermod_staff_inventories`) AVANT d'être vidé, et
-    il est repris (lu puis effacé) avant d'être rendu : rien de perdu ni de rendu deux fois. Invisible sur tout le
+    il est repris (lu puis effacé) avant d'être rendu : rien de perdu ni de rendu deux fois. Pendant l'aller-retour en base,
+    le joueur ne peut ni jeter, ni poser, ni manger, ni ranger, ni ramasser (sinon l'objet serait à la fois dans le
+    monde et dans la photo). Invisible sur tout le
     réseau (EterLib `Vanish`), vol, invulnérable, pas de ramassage ni de monstres. Outils (marqués, ni posés, ni jetés,
     ni rangés ailleurs) : fiche (clic droit sur un joueur), geler, joueur au hasard du réseau, visible/invisible,
     signalements, quitter. L'état (Redis `etermod:staff`) suit le joueur : à l'arrivée sur un serveur, les outils
