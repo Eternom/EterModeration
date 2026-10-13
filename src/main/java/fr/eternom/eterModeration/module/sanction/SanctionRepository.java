@@ -45,8 +45,7 @@ public class SanctionRepository {
         Map<String, Object> values = new HashMap<>(Map.of("uuid", player, "name", playerName, "type", type.name(),
                 "motive", motive, "reason", reason, "staff_name", staffName, "created_at", createdAt, "expires_at", expiresAt,
                 "lifted_at", 0L, "server", server));
-        database.insert(TABLE, values);
-        return database.query("SELECT MAX(id) AS id FROM " + table + " WHERE uuid = ?", player).getFirst().getLong("id");
+        return database.insertReturningId(TABLE, values);
     }
 
     /** L'historique du joueur, la plus récente d'abord. */

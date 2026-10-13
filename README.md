@@ -9,7 +9,7 @@ La vie en prison (travail, remise de peine...) n'est **pas** ici : elle viendra 
 
 ## Prérequis
 
-- **EterLib 1.11.1+** (`depend`) : base, Redis (bus réseau), invisibilité réseau (Vanish), langues, menus (cadre, Dialogs, bouton Retour), joueurs du réseau.
+- **EterLib 1.14.0+** (`depend`) : base (`insertReturningId` pour les sanctions), Redis (bus réseau), invisibilité réseau (Vanish), langues, menus (cadre, Dialogs, bouton Retour), joueurs du réseau.
 - **EterVelocityModeration 1.1.0+** sur le proxy (même base) : prison et ban, appliqués tout de suite.
 - **EterTab 1.1.13+** : les invisibles retirés de la liste Tab du réseau.
 - **EterChat 1.1.7+** : chat séparé des serveurs prison (`prison.server-prefix`).
