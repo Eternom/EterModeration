@@ -38,6 +38,10 @@ motives:
   exploit:
     icon: COMMAND_BLOCK
     steps: [jail 3d, jail 14d, jail perm]
+  # Vendre ou acheter avec de l'argent réel entre joueurs (objets, argent, services, comptes). Seule la boutique officielle vend.
+  real-money:
+    icon: GOLD_INGOT
+    steps: [jail 7d, jail 30d, jail perm]
   # Les seuls cas de ban : s'évader de prison (triche, faille) ou revenir avec un autre compte.
   escape:
     icon: TNT
