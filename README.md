@@ -108,10 +108,13 @@ Les permissions des motifs sont créées au démarrage d'après la config (enfan
     il est repris (lu puis effacé) avant d'être rendu : rien de perdu ni de rendu deux fois. Pendant l'aller-retour en base,
     le joueur ne peut ni jeter, ni poser, ni manger, ni ranger, ni ramasser (sinon l'objet serait à la fois dans le
     monde et dans la photo). Invisible sur tout le
-    réseau (EterLib `Vanish`), vol, invulnérable, pas de ramassage ni de monstres. Outils (marqués, ni posés, ni jetés,
-    ni rangés ailleurs) : fiche (clic droit sur un joueur), geler, joueur au hasard du réseau, visible/invisible,
-    signalements, quitter. L'état (Redis `etermod:staff`) suit le joueur : à l'arrivée sur un serveur, les outils
-    manquants sont redonnés 3 s après (le temps qu'EterSync rende l'inventaire). Pas d'entrée ni de sortie sur
+    réseau (EterLib `Vanish`), vol, invulnérable, pas de faim, pas de ramassage (objets, expérience), pas de monstres qui le
+    ciblent ni qui apparaissent autour de lui ; il ne déclenche ni plaques de pression, ni fils, ni capteurs de sculk, ni
+    cultures piétinées. Ses téléportations ne font ni bruit ni particules pour les autres (EterLib 1.18.1). Outils
+    (marqués, ni posés, ni jetés, ni rangés ailleurs) : fiche (clic droit sur un joueur), geler, joueur au hasard du réseau
+    (pas en prison), visible/invisible, signalements, quitter. L'état (Redis `etermod:staff`) suit le joueur : à l'arrivée
+    sur un serveur, la protection (vol, invulnérabilité) revient tout de suite (sinon il tombe), et les outils manquants
+    sont redonnés 3 s après (le temps qu'EterSync rende l'inventaire). Pas d'entrée ni de sortie sur
     `staff.blocked-servers` (la prison, sans EterSync : l'inventaire rendu y resterait).
   - **geler** (`Freeze`) : plus de déplacement (la tête seulement), de blocs, de coups ; seules les commandes de
     `private-commands`. Redis `etermod:frozen` + bus : appliqué sur le serveur du joueur, et après un changement de

@@ -11,6 +11,7 @@ import fr.eternom.eterLib.module.vanish.Vanish;
 import fr.eternom.eterModeration.module.alert.StaffAlerts;
 import fr.eternom.eterModeration.module.menu.ModGui;
 import fr.eternom.eterModeration.module.sanction.Target;
+import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -22,9 +23,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockReceiveGameEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -49,9 +52,11 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Le mode staff (/staff, eter.mod.staff), sur tout le réseau : l'inventaire est mis de côté en base
  * (StaffInventories) et rendu à la sortie, le joueur devient invisible (EterLib Vanish), vole, ne prend pas de coups,
- * n'est pas ciblé par les monstres et ne ramasse rien. Une barre d'outils : fiche d'un joueur, geler, joueur au hasard,
+ * n'a pas faim, n'est pas ciblé par les monstres, ne ramasse rien (ni objets ni expérience), ne déclenche ni plaques,
+ * ni fils, ni capteurs de sculk, et ne fait pas apparaître de monstres autour de lui. Une barre d'outils : fiche d'un joueur, geler, joueur au hasard,
  * visible/invisible, signalements, quitter. L'état est gardé dans Redis (etermod:staff) : il suit le joueur d'un serveur
- * à l'autre (outils rendus par EterSync, ou redonnés s'ils manquent) et d'une connexion à l'autre.
+ * à l'autre (outils rendus par EterSync, ou redonnés s'ils manquent) et d'une connexion à l'autre. À l'arrivée, la
+ * protection (vol, invulnérabilité) revient tout de suite : sans elle, il tomberait pendant le chargement de l'inventaire.
  * On n'entre ni ne sort du mode sur un serveur de staff.blocked-servers (ex : la prison, sans EterSync : l'inventaire
  * rendu y resterait).
  */
@@ -143,7 +148,8 @@ public class StaffMode implements Listener {
         }, saved -> {
             busy.remove(uuid);
             player.getInventory().clear();
-            apply(player);
+            protect(player);
+            giveTools(player);
             messages.send(player, "staff.on");
             alerts.alert("alert.staff-on", "staff", player.getName());
         }, () -> {
@@ -168,6 +174,7 @@ public class StaffMode implements Listener {
                 player.setAllowFlight(false);
             }
             player.setInvulnerable(false);
+            player.setAffectsSpawning(true);
             EterLib.get().getVanish().set(player, false);
             messages.send(player, "staff.off");
             alerts.alert("alert.staff-off", "staff", player.getName());
@@ -177,13 +184,18 @@ public class StaffMode implements Listener {
         });
     }
 
-    /** Thread principal : invisible, vol, invulnérable, outils (seulement ceux qui manquent). */
-    private void apply(Player player) {
+    /** Thread principal : invisible, vol, invulnérable, pas de monstres qui apparaissent autour. */
+    private void protect(Player player) {
         active.add(player.getUniqueId());
         EterLib.get().getVanish().set(player, true);
         player.setAllowFlight(true);
         player.setFlying(true);
         player.setInvulnerable(true);
+        player.setAffectsSpawning(false);
+    }
+
+    /** Thread principal : les outils qui manquent dans la barre. */
+    private void giveTools(Player player) {
         for (Tool tool : Tool.values()) {
             ItemStack current = player.getInventory().getItem(tool.slot);
             if (tool(current) != tool) {
@@ -214,19 +226,22 @@ public class StaffMode implements Listener {
 
     // ---------- Arrivée, départ ----------
 
+    /** Protégé dès l'arrivée ; les outils, une fois l'inventaire rendu par EterSync. */
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         String uuid = player.getUniqueId().toString();
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            if (player.isOnline()) {
-                Tasks.async(plugin, player, () -> redis.getHashField(KEY, uuid).isPresent(), staff -> {
-                    if (staff && player.hasPermission(PERMISSION)) {
-                        apply(player);
-                    }
-                }, () -> { });
+        Tasks.async(plugin, player, () -> redis.getHashField(KEY, uuid).isPresent(), staff -> {
+            if (!staff || !player.hasPermission(PERMISSION)) {
+                return;
             }
-        }, JOIN_DELAY_TICKS);
+            protect(player);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline() && active.contains(player.getUniqueId())) {
+                    giveTools(player);
+                }
+            }, JOIN_DELAY_TICKS);
+        }, () -> { });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -287,7 +302,11 @@ public class StaffMode implements Listener {
     /** Un joueur au hasard sur tout le réseau (ni soi-même ni un invisible), et on y va. */
     private void randomPlayer(Player staff) {
         Tasks.async(plugin, staff, () -> EterLib.get().getPlayers().listOnline().stream()
-                .filter(player -> !player.uuid().equals(staff.getUniqueId())).toList(), players -> {
+                .filter(player -> !player.uuid().equals(staff.getUniqueId()))
+                // Pas sur un serveur où le mode staff est interdit (prison)
+                .filter(player -> player.server() == null || blockedServers.stream()
+                        .noneMatch(player.server().toLowerCase(Locale.ROOT)::startsWith))
+                .toList(), players -> {
             if (players.isEmpty()) {
                 messages.actionBar(staff, "staff.nobody");
                 return;
@@ -360,6 +379,37 @@ public class StaffMode implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onDamage(EntityDamageEvent event) {
         if (active.contains(event.getEntity().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** Pas de faim : seulement la baisse (manger reste possible). */
+    @EventHandler(ignoreCancelled = true)
+    public void onHunger(FoodLevelChangeEvent event) {
+        if (active.contains(event.getEntity().getUniqueId()) && event.getFoodLevel() < event.getEntity().getFoodLevel()) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onExperience(PlayerPickupExperienceEvent event) {
+        if (active.contains(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** Plaques de pression, fils, cultures piétinées : rien ne trahit le staff invisible. */
+    @EventHandler(priority = EventPriority.LOW)
+    public void onPhysical(PlayerInteractEvent event) {
+        if (event.getAction() == Action.PHYSICAL && active.contains(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** Capteurs de sculk (et le Warden) : ses pas ne vibrent pas. */
+    @EventHandler(ignoreCancelled = true)
+    public void onVibration(BlockReceiveGameEvent event) {
+        if (event.getEntity() != null && active.contains(event.getEntity().getUniqueId())) {
             event.setCancelled(true);
         }
     }
