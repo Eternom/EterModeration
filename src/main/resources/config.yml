@@ -101,6 +101,11 @@ reports:
 staff:
   blocked-servers: [prison]
 
+# Journal des blocs (outil Inspecteur du mode staff : qui a posé ou cassé un bloc) : gardé ce nombre de jours, dans Redis
+# seulement (une clé par chunk et par jour, qui expire d'elle-même). 0 = désactivé.
+block-log:
+  days: 7
+
 # Bouton Retour des menus des joueurs (/appel, /report) : la commande lancée ("menu social" : le sous-menu Social de
 # /menu), vide pour le menu central, "close" pour fermer.
 menus:

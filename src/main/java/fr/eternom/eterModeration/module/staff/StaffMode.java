@@ -54,7 +54,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * (StaffInventories) et rendu à la sortie, le joueur devient invisible (EterLib Vanish), vole, ne prend pas de coups,
  * n'a pas faim, n'est pas ciblé par les monstres, ne ramasse rien (ni objets ni expérience), ne déclenche ni plaques,
  * ni fils, ni capteurs de sculk, et ne fait pas apparaître de monstres autour de lui. Une barre d'outils : fiche d'un joueur, geler, joueur au hasard,
- * visible/invisible, signalements, quitter. L'état est gardé dans Redis (etermod:staff) : il suit le joueur d'un serveur
+ * inspecteur (qui a posé ou cassé un bloc, BlockLog), visible/invisible, signalements, quitter. L'état est gardé dans Redis (etermod:staff) : il suit le joueur d'un serveur
  * à l'autre (outils rendus par EterSync, ou redonnés s'ils manquent) et d'une connexion à l'autre. À l'arrivée, la
  * protection (vol, invulnérabilité) revient tout de suite : sans elle, il tomberait pendant le chargement de l'inventaire.
  * On n'entre ni ne sort du mode sur un serveur de staff.blocked-servers (ex : la prison, sans EterSync : l'inventaire
@@ -69,7 +69,8 @@ public class StaffMode implements Listener {
 
     /** Les outils et leur case dans la barre. */
     private enum Tool {
-        PROFILE(0, Material.BOOK), FREEZE(1, Material.STICK), RANDOM(2, Material.COMPASS), VANISH(4, Material.GRAY_DYE),
+        PROFILE(0, Material.BOOK), FREEZE(1, Material.STICK), RANDOM(2, Material.COMPASS), INSPECT(3, Material.SPYGLASS),
+        VANISH(4, Material.GRAY_DYE),
         REPORTS(7, Material.PAPER), LEAVE(8, Material.RED_DYE);
 
         final int slot;
@@ -91,6 +92,8 @@ public class StaffMode implements Listener {
     private final Freeze freeze;
     private final ModGui gui;
     private final StaffAlerts alerts;
+    /** Journal des blocs (outil Inspecteur), null s'il est désactivé. */
+    private final BlockLog blockLog;
     private final Messages messages;
     private final List<String> blockedServers;
     private final NamespacedKey toolKey;
@@ -100,7 +103,8 @@ public class StaffMode implements Listener {
     private final Set<UUID> busy = ConcurrentHashMap.newKeySet();
 
     public StaffMode(JavaPlugin plugin, RedisCache redis, StaffInventories inventories, Freeze freeze, ModGui gui, StaffAlerts alerts,
-                     Messages messages, List<String> blockedServers) {
+                     Messages messages, List<String> blockedServers, BlockLog blockLog) {
+        this.blockLog = blockLog;
         this.plugin = plugin;
         this.redis = redis;
         this.inventories = inventories;
@@ -293,6 +297,11 @@ public class StaffMode implements Listener {
                 messages.actionBar(staff, vanish.isVanished(staff.getUniqueId()) ? "staff.vanished" : "staff.visible");
             }
             case REPORTS -> gui.openReports(staff);
+            case INSPECT -> {
+                if (blockLog != null && event.getClickedBlock() != null) {
+                    blockLog.inspect(staff, event.getClickedBlock());
+                }
+            }
             case LEAVE -> toggle(staff);
             default -> {
             }

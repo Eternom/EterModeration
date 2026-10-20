@@ -18,6 +18,7 @@ import fr.eternom.eterModeration.module.report.ReportRepository;
 import fr.eternom.eterModeration.module.report.ReportService;
 import fr.eternom.eterModeration.module.staff.Freeze;
 import fr.eternom.eterModeration.module.staff.StaffInventories;
+import fr.eternom.eterModeration.module.staff.BlockLog;
 import fr.eternom.eterModeration.module.staff.StaffMode;
 import fr.eternom.eterModeration.module.sanction.Enforcement;
 import fr.eternom.eterModeration.module.sanction.Labels;
@@ -94,8 +95,15 @@ public final class Main extends JavaPlugin {
         ReportService reports = new ReportService(this, new ReportRepository(database), lib.getRedis(), bus, alerts, messages, server,
                 getConfig().getConfigurationSection("reports"));
         gui = new ModGui(this, sanctions, appeals, records, motives, lib.getPlayers(), messages, labels, reports, freeze);
+        // Qui a posé ou cassé chaque bloc, dans Redis pour block-log.days jours (0 = désactivé) : l'Inspecteur du mode staff
+        int blockLogDays = getConfig().getInt("block-log.days", 7);
+        BlockLog blockLog = blockLogDays > 0 ? new BlockLog(this, lib.getRedis(), messages, server, blockLogDays) : null;
+        if (blockLog != null) {
+            getServer().getPluginManager().registerEvents(blockLog, this);
+            blockLog.start();
+        }
         staffMode = new StaffMode(this, lib.getRedis(), new StaffInventories(database), freeze, gui, alerts, messages,
-                getConfig().getStringList("staff.blocked-servers"));
+                getConfig().getStringList("staff.blocked-servers"), blockLog);
 
         muteGuard = new MuteGuard(enforcement, messages, labels, privateCommands);
         filterListener = new FilterListener(this, new ChatFilter(getConfig().getConfigurationSection("filter")), sanctions, motives,

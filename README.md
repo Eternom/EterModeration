@@ -116,6 +116,11 @@ Les permissions des motifs sont créées au démarrage d'après la config (enfan
     sur un serveur, la protection (vol, invulnérabilité) revient tout de suite (sinon il tombe), et les outils manquants
     sont redonnés 3 s après (le temps qu'EterSync rende l'inventaire). Pas d'entrée ni de sortie sur
     `staff.blocked-servers` (la prison, sans EterSync : l'inventaire rendu y resterait).
+  - **journal des blocs** (`BlockLog`, 1.5.0) : chaque bloc posé ou cassé est noté dans **Redis seulement**
+    (`etermod:blocks:<serveur>:<monde>:<cx>:<cz>:<jour>`, hash `x,y,z` -> action, joueur, heure, bloc ; la dernière action
+    du jour par bloc), écrit par paquets toutes les secondes ; chaque clé expire après `block-log.days` (7) + 1 jours.
+    Outil **Inspecteur** du mode staff (longue-vue, case 4) : clic droit sur un bloc = qui l'a posé ou cassé ces derniers
+    jours. Pour démasquer un build provocateur sans base de données ni nettoyage.
   - **geler** (`Freeze`) : plus de déplacement (la tête seulement), de blocs, de coups ; seules les commandes de
     `private-commands`. Redis `etermod:frozen` + bus : appliqué sur le serveur du joueur, et après un changement de
     serveur ou une reconnexion. Une déconnexion pendant le gel alerte le staff.

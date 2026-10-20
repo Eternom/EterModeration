@@ -274,6 +274,15 @@ freeze:
   done: "<success>✔</success> <info><accent><player></accent> is frozen."
   undone: "<success>✔</success> <info><accent><player></accent> is no longer frozen."
 
+block-log:
+  header: "<info>Block <accent><x> <y> <z></accent>:"
+  empty: "<dark_gray>▸ <info>Nothing logged in the last <accent><days></accent> days (natural block, or older)."
+  placed: "<dark_gray>▸ <accent><block></accent> <info>placed by <accent><player></accent> <dark_gray>(<ago>)"
+  broken: "<dark_gray>▸ <accent><block></accent> <error>broken</error> <info>by <accent><player></accent> <dark_gray>(<ago>)"
+  ago-minutes: "<amount> min ago"
+  ago-hours: "<amount> h ago"
+  ago-days: "<amount> d ago"
+
 staff-tool:
   profile:
     name: "<accent>Player profile"
@@ -284,6 +293,9 @@ staff-tool:
   random:
     name: "<accent>Random player"
     lore: "<dark_gray>▸ <info>Right click: teleported next to a player of the network"
+  inspect:
+    name: "<accent>Inspector"
+    lore: "<dark_gray>▸ <info>Right-click a block: who placed or broke it"
   vanish:
     name: "<accent>Visible / invisible"
     lore: "<dark_gray>▸ <info>Right click"

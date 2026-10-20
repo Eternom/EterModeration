@@ -278,6 +278,15 @@ freeze:
   undone: "<success>✔</success> <info><accent><player></accent> n'est plus gelé."
 
 # Les outils du mode staff (barre d'action)
+block-log:
+  header: "<info>Bloc <accent><x> <y> <z></accent> :"
+  empty: "<dark_gray>▸ <info>Rien noté ces <accent><days></accent> derniers jours (bloc naturel, ou plus ancien)."
+  placed: "<dark_gray>▸ <accent><block></accent> <info>posé par <accent><player></accent> <dark_gray>(<ago>)"
+  broken: "<dark_gray>▸ <accent><block></accent> <error>cassé</error> <info>par <accent><player></accent> <dark_gray>(<ago>)"
+  ago-minutes: "il y a <amount> min"
+  ago-hours: "il y a <amount> h"
+  ago-days: "il y a <amount> j"
+
 staff-tool:
   profile:
     name: "<accent>Fiche du joueur"
@@ -288,6 +297,9 @@ staff-tool:
   random:
     name: "<accent>Joueur au hasard"
     lore: "<dark_gray>▸ <info>Clic droit : téléporté près d'un joueur du réseau"
+  inspect:
+    name: "<accent>Inspecteur"
+    lore: "<dark_gray>▸ <info>Clic droit sur un bloc : qui l'a posé ou cassé"
   vanish:
     name: "<accent>Visible / invisible"
     lore: "<dark_gray>▸ <info>Clic droit"
