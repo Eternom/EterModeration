@@ -35,11 +35,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * ne frappe pas et ne prend pas de coups, et n'a plus que les messages privés comme commandes. Sur tout le réseau :
  * l'état est gardé dans Redis (etermod:frozen), et le serveur où est le joueur l'applique (bus réseau) ; il le
  * reste en changeant de serveur ou en se reconnectant. Une déconnexion pendant le gel est signalée au staff.
- * Permission : eter.mod.freeze.
+ * Permission : eter.mod.freeze. Un membre du staff (eter.mod.freeze.exempt, donné avec eter.mod.staff) ne peut pas être
+ * gelé : refusé tout de suite s'il est ici, sinon son serveur annule le gel (et le staff est prévenu), et un vieux gel
+ * est effacé à sa connexion.
  */
 public class Freeze implements Listener {
 
     public static final String PERMISSION = "eter.mod.freeze";
+    public static final String EXEMPT = "eter.mod.freeze.exempt";
     public static final String KEY = "etermod:frozen";
     private static final String CHANGED = "freeze";
 
@@ -59,7 +62,8 @@ public class Freeze implements Listener {
         this.alerts = alerts;
         this.messages = messages;
         this.privateCommands = privateCommands;
-        bus.on(CHANGED, data -> applyLocal(UUID.fromString(data.get("player").getAsString()), data.get("frozen").getAsBoolean()));
+        bus.on(CHANGED, data -> applyLocal(UUID.fromString(data.get("player").getAsString()), data.get("frozen").getAsBoolean(),
+                data.has("staff") ? data.get("staff").getAsString() : "?"));
         Bukkit.getScheduler().runTaskTimer(plugin, () -> frozen.forEach(uuid -> {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
@@ -82,29 +86,49 @@ public class Freeze implements Listener {
             messages.send(staff, "sanction.self");
             return;
         }
+        // Un membre du staff connecté ici : refusé tout de suite (dégeler reste possible)
+        Player local = Bukkit.getPlayer(target.uuid());
+        if (local != null && local.hasPermission(EXEMPT) && !frozen.contains(target.uuid())) {
+            messages.send(staff, "freeze.exempt", "player", target.name());
+            return;
+        }
         String uuid = target.uuid().toString();
+        String staffName = staff.getName();
         Tasks.async(plugin, staff, () -> {
             boolean freeze = redis.getHashField(KEY, uuid).isEmpty();
             if (freeze) {
-                redis.setHashField(KEY, uuid, staff.getName());
+                redis.setHashField(KEY, uuid, staffName);
             } else {
                 redis.deleteHashField(KEY, uuid);
             }
             return freeze;
         }, freeze -> {
-            applyLocal(target.uuid(), freeze);
-            JsonObject data = new JsonObject();
-            data.addProperty("player", uuid);
-            data.addProperty("frozen", freeze);
-            bus.publish(CHANGED, data);
+            applyLocal(target.uuid(), freeze, staffName);
+            publish(target.uuid(), freeze, staffName);
             messages.send(staff, freeze ? "freeze.done" : "freeze.undone", "player", target.name());
-            alerts.alert(freeze ? "alert.frozen" : "alert.unfrozen", "staff", staff.getName(), "player", target.name());
+            alerts.alert(freeze ? "alert.frozen" : "alert.unfrozen", "staff", staffName, "player", target.name());
         }, () -> messages.send(staff, "error.generic"));
     }
 
-    private void applyLocal(UUID uuid, boolean freeze) {
+    private void publish(UUID player, boolean freeze, String staffName) {
+        JsonObject data = new JsonObject();
+        data.addProperty("player", player.toString());
+        data.addProperty("frozen", freeze);
+        data.addProperty("staff", staffName);
+        bus.publish(CHANGED, data);
+    }
+
+    /** Thread principal. Geler un membre du staff connecté ici (gel donné depuis un autre serveur) : annulé partout. */
+    private void applyLocal(UUID uuid, boolean freeze, String staffName) {
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) {
+            return;
+        }
+        if (freeze && player.hasPermission(EXEMPT)) {
+            frozen.remove(uuid);
+            Tasks.async(plugin, () -> redis.deleteHashField(KEY, uuid.toString()), "Gel de " + uuid + " non annulé");
+            publish(uuid, false, staffName);
+            alerts.alert("alert.freeze-exempt", "staff", staffName, "player", player.getName());
             return;
         }
         if (freeze && frozen.add(uuid)) {
@@ -118,11 +142,8 @@ public class Freeze implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         String uuid = player.getUniqueId().toString();
-        Tasks.async(plugin, player, () -> redis.getHashField(KEY, uuid).isPresent(), isFrozen -> {
-            if (isFrozen) {
-                applyLocal(player.getUniqueId(), true);
-            }
-        }, () -> { });
+        Tasks.async(plugin, player, () -> redis.getHashField(KEY, uuid), by -> by.ifPresent(staffName ->
+                applyLocal(player.getUniqueId(), true, staffName)), () -> { });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

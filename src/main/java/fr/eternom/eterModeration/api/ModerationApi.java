@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Ce qu'EterModeration offre aux autres plugins : les sanctions en cours d'un joueur, son état (muet, en prison, gelé,
- * en mode staff), et donner une sanction (ex : la prison qui allonge une peine). Personne d'autre ne lit les tables
+ * Ce qu'EterModeration offre aux autres plugins : les sanctions en cours d'un joueur, son état (muet, banni, gelé,
+ * en mode staff), et donner une sanction (ex : un anti-triche qui bannit). Personne d'autre ne lit les tables
  * etermod_* ni ses clés Redis : on demande ici. (Exception : EterVelocityModeration, sa moitié proxy, lit les sanctions.)
  * <pre>
  *     // compileOnly("com.github.Eternom:EterModeration:&lt;tag&gt;") ; plugin.yml : softdepend: [EterModeration]
@@ -17,7 +17,7 @@ import java.util.UUID;
  */
 public interface ModerationApi {
 
-    /** Une sanction en cours. type : WARN, MUTE, JAIL ou BAN ; expiresAt 0 = définitive. */
+    /** Une sanction en cours. type : WARN, MUTE ou BAN ; expiresAt 0 = définitive. */
     record SanctionInfo(long id, String type, String motive, String reason, String staffName, long createdAt, long expiresAt) {
     }
 
@@ -26,14 +26,14 @@ public interface ModerationApi {
         return Optional.ofNullable(Bukkit.getServicesManager().load(ModerationApi.class));
     }
 
-    /** Ses sanctions en cours (mute, prison, ban). Bloquant (base) : hors du thread principal. */
+    /** Ses sanctions en cours (mute, ban). Bloquant (base) : hors du thread principal. */
     List<SanctionInfo> activeSanctions(UUID player);
 
     /** Muet en ce moment. Bloquant (base). */
     boolean isMuted(UUID player);
 
-    /** En prison en ce moment. Bloquant (base). */
-    boolean isJailed(UUID player);
+    /** Banni en ce moment. Bloquant (base). */
+    boolean isBanned(UUID player);
 
     /** Gelé par le staff. Bloquant (Redis). */
     boolean isFrozen(UUID player);
@@ -42,7 +42,7 @@ public interface ModerationApi {
     boolean isInStaffMode(UUID player);
 
     /**
-     * Donne une sanction hors barème au nom de author (« Prison », « Anti-triche »...) : type WARN, MUTE, JAIL ou BAN,
+     * Donne une sanction hors barème au nom de author (« Anti-triche »...) : type WARN, MUTE ou BAN,
      * duration null = définitive. Appliquée tout de suite partout (proxy compris), le joueur prévenu, le staff alerté.
      * Bloquant (base). Rend son numéro.
      */

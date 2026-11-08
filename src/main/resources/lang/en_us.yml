@@ -7,7 +7,6 @@
 type:
   warn: "Warning"
   mute: "Mute"
-  jail: "Jail"
   ban: "Ban"
 motive-free: "Free sanction"
 motive:
@@ -20,7 +19,8 @@ motive:
   cheat: "Cheating"
   exploit: "Bug abuse"
   real-money: "Real-money trading"
-  escape: "Prison escape"
+  # Old motive (jail removed): history only
+  escape: "Escape (old motive)"
   evasion: "Sanction evasion"
 length:
   permanent: "permanent"
@@ -47,7 +47,6 @@ notify:
   report-closed: "<info>Your report against <accent><player></accent> was handled by the staff. Thanks!"
   warn: "<error>Warning</error> <info>for <accent><motive></accent>. <reason> <dark_gray>The next one will be heavier. Your sanctions: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
   mute: "<error>You are muted for <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>No chat, no private messages. Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
-  jail: "<error>You are sent to jail for <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
   ban: "<error>You are banned from the network</error> <info>(<accent><motive></accent>). <reason>"
   lifted: "<success>Your sanction (<type>) has been lifted.</success>"
   appeal-accepted: "<success>Your appeal is accepted: your sanction is lifted.</success> <info>Answer: <accent><answer>"
@@ -76,6 +75,7 @@ alert:
   frozen: "<accent><staff></accent> <info>froze <accent><player>"
   unfrozen: "<accent><staff></accent> <info>unfroze <accent><player>"
   frozen-quit: "<error><accent><player></accent> logged out while frozen!"
+  freeze-exempt: "<accent><staff></accent> <info>tried to freeze <accent><player></accent>, a staff member: freeze cancelled."
   staff-on: "<accent><staff></accent> <info>enters staff mode"
   staff-off: "<accent><staff></accent> <info>leaves staff mode"
   given: "<accent><staff></accent> <info>→ <accent><player></accent>: <type> <time> <dark_gray>(<motive>) <reason>"
@@ -273,6 +273,7 @@ freeze:
   no-command: "<error>You are frozen: only private messages are allowed."
   done: "<success>✔</success> <info><accent><player></accent> is frozen."
   undone: "<success>✔</success> <info><accent><player></accent> is no longer frozen."
+  exempt: "<error><accent><player></accent> is a staff member: they can't be frozen."
 
 block-log:
   header: "<info>Block <accent><x> <y> <z></accent>:"

@@ -41,9 +41,9 @@ import java.util.Set;
 
 
 /**
- * La modération du réseau, sur chaque serveur Paper : sanctions selon un barème (avertissement, mute, prison, ban),
- * appels, alertes au staff, journal du chat, comptes liés, notes, filtre du chat. La prison et le ban sont appliqués
- * par le proxy (EterVelocityModeration), qui lit les mêmes tables.
+ * La modération du réseau, sur chaque serveur Paper : sanctions selon un barème (avertissement, mute, ban),
+ * appels, alertes au staff, journal du chat, comptes liés, notes, filtre du chat. Le ban est appliqué par le proxy
+ * (EterVelocityModeration), qui lit les mêmes tables.
  */
 public final class Main extends JavaPlugin {
 

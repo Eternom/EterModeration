@@ -15,9 +15,9 @@ import java.time.Duration;
 
 /**
  * Donner et lever les sanctions. Chaque action a sa permission : le type (eter.mod.warn...), puis le motif
- * (eter.mod.motive.<motif>) ou, pour une sanction libre, eter.mod.free (et eter.mod.permanent si elle est définitive) ;
- * lever : eter.mod.lift. Après l'écriture en base : le joueur est prévenu où qu'il soit, le staff alerté, et la
- * sanction appliquée tout de suite (Enforcement : mute ici, prison et ban par le proxy).
+ * (eter.mod.motive.<motif>) ou, pour une sanction libre, eter.mod.free ; une sanction définitive (barème ou libre)
+ * demande aussi eter.mod.permanent ; lever : eter.mod.lift. Après l'écriture en base : le joueur est prévenu où qu'il soit, le staff alerté, et la
+ * sanction appliquée tout de suite (Enforcement : mute ici, ban par le proxy).
  */
 public class SanctionService {
 
@@ -46,9 +46,13 @@ public class SanctionService {
         this.server = server;
     }
 
-    /** Le staff peut-il utiliser ce motif à cette étape ? (permission du motif et du type de sanction) */
+    /**
+     * Le staff peut-il utiliser ce motif à cette étape ? (permission du motif et du type de sanction ; une étape
+     * définitive, comme « ban perm », demande aussi eter.mod.permanent : un modérateur bannit pour un temps seulement)
+     */
     public static boolean canUse(CommandSender staff, Motive motive, Step step) {
-        return staff.hasPermission(motive.permission()) && staff.hasPermission(step.type().permission());
+        return staff.hasPermission(motive.permission()) && staff.hasPermission(step.type().permission())
+                && (!step.type().lasts() || step.duration() != null || staff.hasPermission(PERMANENT_PERMISSION));
     }
 
     public static boolean canGiveFree(CommandSender staff, SanctionType type, Duration duration) {

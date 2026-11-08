@@ -57,7 +57,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * inspecteur (qui a posé ou cassé un bloc, BlockLog), visible/invisible, signalements, quitter. L'état est gardé dans Redis (etermod:staff) : il suit le joueur d'un serveur
  * à l'autre (outils rendus par EterSync, ou redonnés s'ils manquent) et d'une connexion à l'autre. À l'arrivée, la
  * protection (vol, invulnérabilité) revient tout de suite : sans elle, il tomberait pendant le chargement de l'inventaire.
- * On n'entre ni ne sort du mode sur un serveur de staff.blocked-servers (ex : la prison, sans EterSync : l'inventaire
+ * On n'entre ni ne sort du mode sur un serveur de staff.blocked-servers (un serveur sans EterSync : l'inventaire
  * rendu y resterait).
  */
 public class StaffMode implements Listener {
@@ -312,7 +312,7 @@ public class StaffMode implements Listener {
     private void randomPlayer(Player staff) {
         Tasks.async(plugin, staff, () -> EterLib.get().getPlayers().listOnline().stream()
                 .filter(player -> !player.uuid().equals(staff.getUniqueId()))
-                // Pas sur un serveur où le mode staff est interdit (prison)
+                // Pas sur un serveur où le mode staff est interdit (staff.blocked-servers)
                 .filter(player -> player.server() == null || blockedServers.stream()
                         .noneMatch(player.server().toLowerCase(Locale.ROOT)::startsWith))
                 .toList(), players -> {

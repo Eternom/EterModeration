@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 /**
  * Le barème (config.yml > motives) : chaque motif a ses étapes, de la première fois à la récidive (« mute 10m »,
- * « jail 3d », « ban perm »...) ; au-delà de la dernière, la dernière se répète. Utiliser un motif : permission
+ * « ban 3d », « ban perm »...) ; au-delà de la dernière, la dernière se répète. Utiliser un motif : permission
  * eter.mod.motive.<motif> (et celle du type de sanction). Le nom affiché est dans lang/ (motive.<motif>).
  */
 public final class Motives {
@@ -36,6 +36,9 @@ public final class Motives {
         }
     }
 
+    /** L'ancienne prison, supprimée : une étape « jail » d'une vieille config devient un ban de même durée. */
+    private static final String LEGACY_JAIL = "jail";
+
     private final Map<String, Motive> motives;
 
     private Motives(Map<String, Motive> motives) {
@@ -50,8 +53,12 @@ public final class Motives {
                 for (String text : section.getStringList(id + ".steps")) {
                     Step step = parseStep(text);
                     if (step == null) {
-                        logger.warning("motives." + id + " : étape « " + text + " » ignorée (ex : « mute 1h », « jail perm »)");
+                        logger.warning("motives." + id + " : étape « " + text + " » ignorée (ex : « mute 1h », « ban perm »)");
                     } else {
+                        if (text.trim().toLowerCase(Locale.ROOT).startsWith(LEGACY_JAIL)) {
+                            logger.warning("motives." + id + " : « " + text + " » : la prison n'existe plus, lu comme un ban"
+                                    + " (remplace « jail » par « ban » dans config.yml)");
+                        }
                         steps.add(step);
                     }
                 }
@@ -73,10 +80,10 @@ public final class Motives {
         return Optional.ofNullable(id == null ? null : motives.get(id.toLowerCase(Locale.ROOT)));
     }
 
-    /** « mute 10m », « jail 3d », « ban perm », « warn ». */
+    /** « mute 10m », « ban 3d », « ban perm », « warn » ; « jail » (ancienne prison) est lu comme « ban ». */
     static Step parseStep(String text) {
         String[] parts = text.trim().toLowerCase(Locale.ROOT).split("\\s+");
-        SanctionType type = SanctionType.of(parts[0]);
+        SanctionType type = parts[0].equals(LEGACY_JAIL) ? SanctionType.BAN : SanctionType.of(parts[0]);
         if (type == null) {
             return null;
         }

@@ -18,9 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Faire respecter une sanction tout de suite, où que soit le joueur.
  * - Mute : gardé en mémoire pour les joueurs connectés ici (MuteGuard le lit à chaque message).
- * - Prison, ban, libération : c'est le PROXY qui décide (EterVelocityModeration). Le serveur où est le joueur lui envoie
+ * - Ban : c'est le PROXY qui l'applique (EterVelocityModeration). Le serveur où est le joueur lui envoie
  *   « relis ses sanctions » par le canal eter:moderation, à travers la connexion du joueur : seul un serveur peut
- *   écrire sur ce canal (un joueur ne peut pas se libérer lui-même), et le proxy relit tout en base.
+ *   écrire sur ce canal (un joueur ne peut ni se débannir ni bannir quelqu'un), et le proxy relit tout en base.
  * Un changement fait ailleurs arrive par le bus réseau (« refresh »), et le serveur du joueur fait le reste.
  */
 public class Enforcement {
@@ -50,7 +50,7 @@ public class Enforcement {
         bus.publish(REFRESH, data);
     }
 
-    /** Connexion : son mute éventuel (le proxy a déjà décidé de la prison et du ban à l'entrée). */
+    /** Connexion : son mute éventuel (le proxy a déjà refusé un banni à l'entrée). */
     public void join(Player player) {
         load(player.getUniqueId());
     }

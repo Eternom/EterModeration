@@ -12,7 +12,7 @@ import java.util.UUID;
 
 /**
  * Les sanctions (etermod_sanctions), seule source de vérité du réseau : le proxy (EterVelocityModeration)
- * y lit la prison et le ban à chaque connexion. Une sanction n'est jamais effacée : levée, elle garde qui l'a levée.
+ * y lit le ban à chaque connexion. Une sanction n'est jamais effacée : levée, elle garde qui l'a levée.
  * Bloquant : hors du thread principal.
  */
 public class SanctionRepository {
@@ -38,6 +38,9 @@ public class SanctionRepository {
                 Column.of("lifted_by", Column.Type.STRING).length(32),
                 Column.of("server", Column.Type.STRING).length(64).notNull());
         this.table = database.table(TABLE);
+        // La prison n'existe plus : ses sanctions deviennent des bans de même fin (une peine en cours continue, en ban ;
+        // l'historique et la récidive restent justes). Une fois fait, ne touche plus aucune ligne.
+        database.execute("UPDATE " + table + " SET type = 'BAN' WHERE type = 'JAIL'");
     }
 
     public long add(UUID player, String playerName, SanctionType type, String motive, String reason, String staffName,
@@ -54,7 +57,7 @@ public class SanctionRepository {
                 .map(SanctionRepository::toSanction).toList();
     }
 
-    /** Ses sanctions en cours (mute, prison, ban). */
+    /** Ses sanctions en cours (mute, ban). */
     public List<Sanction> active(UUID player, long now) {
         return database.query("SELECT * FROM " + table + " WHERE uuid = ? AND lifted_at = 0 AND type <> 'WARN'"
                 + " AND (expires_at = 0 OR expires_at > ?) ORDER BY created_at DESC", player, now).stream()

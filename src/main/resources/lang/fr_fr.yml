@@ -7,7 +7,6 @@
 type:
   warn: "Avertissement"
   mute: "Mute"
-  jail: "Prison"
   ban: "Ban"
 motive-free: "Sanction libre"
 motive:
@@ -20,7 +19,8 @@ motive:
   cheat: "Triche"
   exploit: "Exploitation de bug"
   real-money: "Commerce en argent réel"
-  escape: "Évasion de prison"
+  # Ancien motif (prison supprimée) : seulement pour l'historique
+  escape: "Évasion (ancien motif)"
   evasion: "Contournement de sanction"
 length:
   permanent: "définitive"
@@ -49,7 +49,6 @@ notify:
   report-closed: "<info>Ton signalement contre <accent><player></accent> a été traité par le staff. Merci !"
   warn: "<error>Avertissement</error> <info>pour <accent><motive></accent>. <reason> <dark_gray>Le prochain sera plus lourd. Tes sanctions : <click:run_command:'/appel'><accent>/appel</accent></click>"
   mute: "<error>Tu es muet pour <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Ni chat ni messages privés. Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
-  jail: "<error>Tu es envoyé en prison pour <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
   ban: "<error>Tu es banni du réseau</error> <info>(<accent><motive></accent>). <reason>"
   lifted: "<success>Ta sanction (<type>) a été levée.</success>"
   appeal-accepted: "<success>Ton appel est accepté : ta sanction est levée.</success> <info>Réponse : <accent><answer>"
@@ -79,6 +78,7 @@ alert:
   frozen: "<accent><staff></accent> <info>a gelé <accent><player>"
   unfrozen: "<accent><staff></accent> <info>a dégelé <accent><player>"
   frozen-quit: "<error><accent><player></accent> s'est déconnecté en étant gelé !"
+  freeze-exempt: "<accent><staff></accent> <info>a voulu geler <accent><player></accent>, membre du staff : gel annulé."
   staff-on: "<accent><staff></accent> <info>passe en mode staff"
   staff-off: "<accent><staff></accent> <info>quitte le mode staff"
   given: "<accent><staff></accent> <info>→ <accent><player></accent> : <type> <time> <dark_gray>(<motive>) <reason>"
@@ -276,6 +276,7 @@ freeze:
   no-command: "<error>Tu es gelé : seuls les messages privés sont possibles."
   done: "<success>✔</success> <info><accent><player></accent> est gelé."
   undone: "<success>✔</success> <info><accent><player></accent> n'est plus gelé."
+  exempt: "<error><accent><player></accent> fait partie du staff : impossible de le geler."
 
 # Les outils du mode staff (barre d'action)
 block-log:

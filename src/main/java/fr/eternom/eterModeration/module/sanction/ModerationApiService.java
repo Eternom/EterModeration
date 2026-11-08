@@ -33,8 +33,8 @@ public class ModerationApiService implements ModerationApi {
     }
 
     @Override
-    public boolean isJailed(UUID player) {
-        return has(player, SanctionType.JAIL);
+    public boolean isBanned(UUID player) {
+        return has(player, SanctionType.BAN);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ModerationApiService implements ModerationApi {
     public long give(UUID player, String playerName, String type, Duration duration, String reason, String author) {
         SanctionType sanctionType = SanctionType.of(type);
         if (sanctionType == null) {
-            throw new IllegalArgumentException("Type de sanction inconnu : " + type + " (warn, mute, jail, ban)");
+            throw new IllegalArgumentException("Type de sanction inconnu : " + type + " (warn, mute, ban)");
         }
         return sanctions.giveFromPlugin(new Target(player, playerName), sanctionType, duration, reason == null ? "" : reason, author);
     }

@@ -6,14 +6,13 @@ import java.util.Locale;
 
 /**
  * Les sanctions. WARN : noté dans l'historique (et compte pour la récidive). MUTE : plus de chat ni de messages privés.
- * JAIL : seulement le serveur prison (le proxy y veille). BAN : refusé à l'entrée du réseau (cas très graves).
+ * BAN : refusé à l'entrée du réseau (le proxy y veille), temporaire ou définitif.
  * Donner une sanction : permission eter.mod.<id>.
  */
 public enum SanctionType {
 
     WARN(Material.PAPER),
     MUTE(Material.BARRIER),
-    JAIL(Material.IRON_BARS),
     BAN(Material.TNT);
 
     private final Material icon;

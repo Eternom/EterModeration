@@ -48,11 +48,8 @@ permissions:
   eter.mod.mute:
     description: Rendre muet (chat et messages privés).
     default: op
-  eter.mod.jail:
-    description: Envoyer en prison.
-    default: op
   eter.mod.ban:
-    description: Bannir du réseau (cas très graves).
+    description: Bannir du réseau, temporairement ou définitivement.
     default: op
   eter.mod.motive.*:
     description: Utiliser tous les motifs du barème (sinon eter.mod.motive.<motif>, un par un).
@@ -61,7 +58,7 @@ permissions:
     description: Sanction libre, hors barème (durée et raison au choix).
     default: op
   eter.mod.permanent:
-    description: Sanction libre définitive.
+    description: Sanction définitive (étape « perm » du barème, ou sanction libre).
     default: op
   eter.mod.lift:
     description: Lever une sanction en cours.
@@ -84,6 +81,11 @@ permissions:
   eter.mod.staff:
     description: 'Mode staff (/staff) : invisible sur tout le réseau, outils ; aller voir un joueur depuis sa fiche.'
     default: op
+    children:
+      eter.mod.freeze.exempt: true
+  eter.mod.freeze.exempt:
+    description: 'Ne peut pas être gelé (le staff : donnée avec eter.mod.staff).'
+    default: op
   eter.mod.freeze:
     description: Geler un joueur (il ne bouge plus, pour lui parler).
     default: op
@@ -104,12 +106,12 @@ permissions:
       eter.mod.report: true
       eter.mod.staff: true
       eter.mod.freeze: true
+      eter.mod.freeze.exempt: true
       eter.mod.reports: true
       eter.vanish.see: true
       eter.mod.use: true
       eter.mod.warn: true
       eter.mod.mute: true
-      eter.mod.jail: true
       eter.mod.ban: true
       eter.mod.motive.*: true
       eter.mod.free: true

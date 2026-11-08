@@ -2,50 +2,49 @@
 #  EterModeration : la modération du réseau
 # ============================================================
 #
-#  À installer sur TOUS les serveurs Paper, avec EterVelocityModeration sur le proxy (c'est lui qui garde les
-#  prisonniers en prison et refuse les bannis). Les sanctions sont dans la base commune : une sanction donnée sur
+#  À installer sur TOUS les serveurs Paper, avec EterVelocityModeration sur le proxy (c'est lui qui refuse les
+#  bannis). Les sanctions sont dans la base commune : une sanction donnée sur
 #  un serveur vaut partout. Tout se fait dans /mod (staff) et /appel (joueurs).
 #  Une permission par action (voir le README) : chaque grade du staff reçoit seulement ce qu'il peut faire.
 #  Les textes (noms des motifs compris) sont dans lang/. Aussi : /staff (mode staff), /report (signalements). Toute modification nécessite un redémarrage du serveur.
 
 # Le barème : chaque motif a ses étapes, de la première fois à la récidive ; au-delà de la dernière, la dernière
-# se répète. Une étape : « warn », « mute 10m », « jail 3d », « ban perm » (s, m, h, d, w ; perm = définitive).
+# se répète. Une étape : « warn », « mute 10m », « ban 3d », « ban perm » (s, m, h, d, w ; perm = définitive).
 # Une sanction levée (erreur, appel accepté) ne compte pas pour la récidive.
 # Utiliser un motif : eter.mod.motive.<motif> ET la permission du type de l'étape (eter.mod.mute...).
 # Nom affiché : lang/<langue>.yml > motive.<motif>. icon : l'objet dans le menu.
+# Pas de prison : un ban empêche de jouer du tout. Le chat se règle d'abord par le mute, le ban vient après.
 motives:
   spam:
     icon: PAPER
     steps: [warn, mute 10m, mute 1h, mute 1d]
   insult:
     icon: BLAZE_POWDER
-    steps: [warn, mute 1h, mute 1d, jail 1d]
+    steps: [warn, mute 1h, mute 1d, mute 7d, ban 3d]
   threat:
     icon: SKELETON_SKULL
-    steps: [mute 1d, mute 7d, jail 7d]
+    steps: [mute 1d, mute 7d, ban 7d]
   advertising:
     icon: OAK_SIGN
-    steps: [mute 1d, jail 3d, jail 14d]
+    steps: [mute 1d, mute 7d, ban 7d]
+  # Pseudo, skin, construction : un mute n'y change rien.
   inappropriate:
     icon: NAME_TAG
-    steps: [warn, jail 1d, jail 7d]
+    steps: [warn, ban 1d, ban 7d]
   grief:
     icon: FLINT_AND_STEEL
-    steps: [jail 1d, jail 7d, jail perm]
+    steps: [ban 1d, ban 7d, ban 30d, ban perm]
   cheat:
     icon: DIAMOND_PICKAXE
-    steps: [jail 7d, jail 30d, jail perm]
+    steps: [ban 7d, ban 30d, ban perm]
   exploit:
     icon: COMMAND_BLOCK
-    steps: [jail 3d, jail 14d, jail perm]
+    steps: [ban 3d, ban 14d, ban perm]
   # Vendre ou acheter avec de l'argent réel entre joueurs (objets, argent, services, comptes). Seule la boutique officielle vend.
   real-money:
     icon: GOLD_INGOT
-    steps: [jail 7d, jail 30d, jail perm]
-  # Les seuls cas de ban : s'évader de prison (triche, faille) ou revenir avec un autre compte.
-  escape:
-    icon: TNT
-    steps: [ban perm]
+    steps: [ban 7d, ban 30d, ban perm]
+  # Revenir avec un autre compte pendant un ban.
   evasion:
     icon: PLAYER_HEAD
     steps: [ban perm]
@@ -97,9 +96,9 @@ reports:
     other: BOOK
 
 # Mode staff (/staff) : ni entrée ni sortie sur les serveurs dont le nom commence par l'un de ces préfixes
-# (la prison n'a pas EterSync : l'inventaire rendu y resterait coincé).
+# (un serveur sans EterSync : l'inventaire rendu y resterait coincé).
 staff:
-  blocked-servers: [prison]
+  blocked-servers: []
 
 # Journal des blocs (outil Inspecteur du mode staff : qui a posé ou cassé un bloc) : gardé ce nombre de jours, dans Redis
 # seulement (une clé par chunk et par jour, qui expire d'elle-même). 0 = désactivé.

@@ -2,35 +2,37 @@
 
 La **modération** du réseau, côté Paper : sanctions selon un barème, appels, alertes au staff, journal du chat, comptes
 liés, notes du staff, filtre du chat. Document développeur, à tenir à jour avec le code. À installer sur **tous** les
-serveurs Paper, avec **EterVelocityModeration** sur le proxy : c'est lui qui garde les prisonniers sur les serveurs
-prison et refuse les bannis à l'entrée.
+serveurs Paper, avec **EterVelocityModeration** sur le proxy : c'est lui qui refuse les bannis à l'entrée.
 
-La vie en prison (travail, remise de peine...) n'est **pas** ici : elle viendra dans un plugin dédié.
+Il n'y a **pas de prison** (supprimée en 2.0.0) : les sanctions sont l'avertissement, le mute et le ban.
 
 ## Prérequis
 
 - **EterLib 1.14.0+** (`depend`) : base (`insertReturningId` pour les sanctions), Redis (bus réseau), invisibilité réseau (Vanish), langues, menus (cadre, Dialogs, bouton Retour), joueurs du réseau.
-- **EterVelocityModeration 1.1.0+** sur le proxy (même base) : prison et ban, appliqués tout de suite.
+- **EterVelocityModeration 2.0.0+** sur le proxy (même base) : le ban, appliqué tout de suite.
 - **EterTab 1.1.13+** : les invisibles retirés de la liste Tab du réseau.
-- **EterChat 1.1.7+** : chat séparé des serveurs prison (`prison.server-prefix`).
 
 ## Les sanctions
 
-Quatre types (`SanctionType`) :
+Trois types (`SanctionType`) :
 
 | Type | Effet | Appliqué par |
 |---|---|---|
 | `warn` | noté dans l'historique, compte pour la récidive | — |
 | `mute` | plus de chat ni de messages privés (`private-commands`) | ce plugin (`MuteGuard`) |
-| `jail` | seulement les serveurs prison, temporaire ou définitive | le proxy |
-| `ban` | refusé à l'entrée du réseau : cas très graves (évasion de prison, contournement) | le proxy |
+| `ban` | refusé à l'entrée du réseau, temporaire ou définitif | le proxy |
 
 **Barème** (`config.yml > motives`) : chaque motif a ses étapes, de la première fois à la récidive (`mute 10m`,
-`jail 3d`, `ban perm`) ; au-delà de la dernière, la dernière se répète. La récidive compte les sanctions de ce motif
+`ban 3d`, `ban perm`) ; les fautes de chat passent d'abord par le mute, le ban vient ensuite ; au-delà de la dernière, la dernière se répète. La récidive compte les sanctions de ce motif
 **non levées**. Le menu affiche la peine **avant** de valider. Les noms des motifs sont dans `lang/` (`motive.<id>`).
 Une sanction libre (hors barème) demande `eter.mod.free` et une raison.
 
 Une sanction n'est **jamais effacée** : levée (erreur, appel accepté), elle garde qui l'a levée et quand.
+
+**Fin de la prison (2.0.0)** : au démarrage, les anciennes sanctions `JAIL` deviennent des `BAN` de même fin
+(`SanctionRepository`) : une peine en cours continue en ban, l'historique et la récidive restent justes. Une étape
+`jail` d'une ancienne config est lue comme `ban` (avec un avertissement dans la console) ; le motif `escape` (évasion)
+n'est plus dans la config par défaut, son nom reste dans `lang/` pour l'historique.
 
 ### Application immédiate (`Enforcement`)
 
@@ -39,7 +41,7 @@ Une sanction n'est **jamais effacée** : levée (erreur, appel accepté), elle g
 3. Le serveur où **est** le joueur relit son mute, et envoie au proxy « relis ses sanctions » sur le canal
    `eter:moderation`, **à travers la connexion du joueur** : seul un serveur peut écrire sur ce canal (le proxy refuse
    ce qui vient d'un client), et le message ne porte que l'UUID ; le proxy relit tout en base. Un joueur ne peut donc
-   ni se libérer ni sanctionner quelqu'un.
+   ni se débannir ni sanctionner quelqu'un.
 
 Un joueur hors ligne n'a besoin de rien : le proxy lit ses sanctions à la connexion.
 
@@ -66,15 +68,17 @@ Chaque grade du staff reçoit exactement ce qu'il peut faire (LuckPerms). `eter.
 | Permission | Action |
 |---|---|
 | `eter.mod.use` | ouvrir `/mod` et la fiche d'un joueur |
-| `eter.mod.warn` / `.mute` / `.jail` / `.ban` | donner ce type de sanction |
+| `eter.mod.warn` / `.mute` / `.ban` | donner ce type de sanction |
 | `eter.mod.motive.<motif>` (ou `eter.mod.motive.*`) | utiliser ce motif (en plus du type de l'étape) |
-| `eter.mod.free` | sanction libre ; `eter.mod.permanent` pour qu'elle soit définitive |
+| `eter.mod.free` | sanction libre (hors barème) |
+| `eter.mod.permanent` | une sanction définitive : étape `perm` du barème ou sanction libre (sans elle, le menu la montre verrouillée) |
 | `eter.mod.lift` | lever une sanction en cours |
 | `eter.mod.appeals` | traiter les appels |
 | `eter.mod.history` / `.notes` / `.chatlog` / `.alts` | historique et dernières sanctions / notes / messages / comptes liés |
 | `eter.mod.alerts` | recevoir les alertes du réseau |
 | `eter.mod.staff` | `/staff`, aller voir un joueur depuis sa fiche |
 | `eter.mod.freeze` | geler un joueur |
+| `eter.mod.freeze.exempt` | ne peut pas être gelé (donnée avec `eter.mod.staff`) |
 | `eter.mod.reports` | traiter les signalements |
 | `eter.vanish.see` (EterLib) | voir les invisibles (donné par `eter.mod.*`) |
 | `eter.mod.bypass.filter` | pas de filtre du chat |
@@ -112,10 +116,10 @@ Les permissions des motifs sont créées au démarrage d'après la config (enfan
     ciblent ni qui apparaissent autour de lui ; il ne déclenche ni plaques de pression, ni fils, ni capteurs de sculk, ni
     cultures piétinées. Ses téléportations ne font ni bruit ni particules pour les autres (EterLib 1.18.1). Outils
     (marqués, ni posés, ni jetés, ni rangés ailleurs) : fiche (clic droit sur un joueur), geler, joueur au hasard du réseau
-    (pas en prison), visible/invisible, signalements, quitter. L'état (Redis `etermod:staff`) suit le joueur : à l'arrivée
+    (pas sur `staff.blocked-servers`), visible/invisible, signalements, quitter. L'état (Redis `etermod:staff`) suit le joueur : à l'arrivée
     sur un serveur, la protection (vol, invulnérabilité) revient tout de suite (sinon il tombe), et les outils manquants
     sont redonnés 3 s après (le temps qu'EterSync rende l'inventaire). Pas d'entrée ni de sortie sur
-    `staff.blocked-servers` (la prison, sans EterSync : l'inventaire rendu y resterait).
+    `staff.blocked-servers` (vide par défaut : un serveur sans EterSync, où l'inventaire rendu resterait).
   - **journal des blocs** (`BlockLog`, 1.5.0) : chaque bloc posé ou cassé est noté dans **Redis seulement**
     (`etermod:blocks:<serveur>:<monde>:<cx>:<cz>:<jour>`, hash `x,y,z` -> action, joueur, heure, bloc ; la dernière action
     du jour par bloc), écrit par paquets toutes les secondes ; chaque clé expire après `block-log.days` (7) + 1 jours.
@@ -123,7 +127,9 @@ Les permissions des motifs sont créées au démarrage d'après la config (enfan
     jours. Pour démasquer un build provocateur sans base de données ni nettoyage.
   - **geler** (`Freeze`) : plus de déplacement (la tête seulement), de blocs, de coups ; seules les commandes de
     `private-commands`. Redis `etermod:frozen` + bus : appliqué sur le serveur du joueur, et après un changement de
-    serveur ou une reconnexion. Une déconnexion pendant le gel alerte le staff.
+    serveur ou une reconnexion. Une déconnexion pendant le gel alerte le staff. Le staff (`eter.mod.freeze.exempt`)
+    ne peut pas être gelé : refusé tout de suite s'il est sur le même serveur, sinon son serveur annule le gel et
+    alerte le staff ; un ancien gel est effacé à sa connexion.
 - **`report`** : `etermod_reports`, ouverts jusqu'à ce qu'un membre du staff les traite.
 - **`menu`** : `ModGui` (chargement en tâche de fond puis ouverture, fenêtres) et les menus. Cadre rouge pour le staff,
   orange pour `/appel`.
@@ -139,9 +145,10 @@ cours), `appeals`, `notes`, `chat`, `links`, `settings`, `reports`, `staff_inven
 ni ses clés Redis (`etermod:frozen`, `etermod:staff`...). Seule exception : EterVelocityModeration, sa moitié proxy, qui
 lit `etermod_sanctions` (le proxy ne peut pas appeler un plugin Paper au moment où un joueur se connecte).
 
-- `activeSanctions(uuid)`, `isMuted`, `isJailed`, `isFrozen`, `isInStaffMode` (bloquant) ;
-- `give(uuid, pseudo, type, durée, raison, auteur)` : une sanction hors barème au nom d'un autre plugin (ex : la prison
-  qui allonge une peine), appliquée et annoncée comme les autres.
+- `activeSanctions(uuid)`, `isMuted`, `isBanned`, `isFrozen`, `isInStaffMode` (bloquant) ; `isJailed` est supprimé
+  (2.0.0) ;
+- `give(uuid, pseudo, type, durée, raison, auteur)` : une sanction hors barème (`warn`, `mute`, `ban`) au nom d'un autre
+  plugin (ex : un anti-triche), appliquée et annoncée comme les autres.
 
 Ce qu'EterModeration demande aux autres : clan (`ClanApi`), homes (`HomeApi`), inventaire (`SyncApi`) pour la fiche ;
 chacune n'est appelée que si son plugin tourne sur ce serveur (`Integrations`).
