@@ -33,6 +33,7 @@ public class Enforcement {
     private final NetworkBus bus;
     /** Mute en cours des joueurs connectés ici. */
     private final Map<UUID, Sanction> mutes = new ConcurrentHashMap<>();
+    private PlayerNotices notices;
 
     public Enforcement(JavaPlugin plugin, SanctionRepository sanctions, NetworkBus bus) {
         this.plugin = plugin;
@@ -77,6 +78,14 @@ public class Enforcement {
         }
         load(uuid);
         player.sendPluginMessage(plugin, CHANNEL, refreshMessage(uuid));
+        if (notices != null) {
+            notices.check(player);
+        }
+    }
+
+    /** Ce que le joueur doit voir tout de suite (avertissement à accepter) : branché après la création. */
+    public void setNotices(PlayerNotices notices) {
+        this.notices = notices;
     }
 
     private void load(UUID uuid) {

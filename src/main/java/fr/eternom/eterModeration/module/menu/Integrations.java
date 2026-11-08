@@ -6,6 +6,7 @@ import fr.eternom.eterModeration.module.sanction.Target;
 import fr.eternom.eterSync.api.SyncApi;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
 
@@ -42,6 +43,16 @@ final class Integrations {
         }
     }
 
+    /** Son dernier inventaire enregistré (41 cases : inventaire, armure, seconde main). Bloquant (base). */
+    static Optional<ItemStack[]> lastInventory(Target target) {
+        return has("EterSync") ? Inventories.last(target) : Optional.empty();
+    }
+
+    /** Son dernier coffre de l'Ender enregistré. Bloquant (base). */
+    static Optional<ItemStack[]> lastEnderChest(Target target) {
+        return has("EterSync") ? Inventories.lastEnder(target) : Optional.empty();
+    }
+
     private static final class Clans {
         static Optional<String> of(Target target) {
             return ClanApi.get().flatMap(clans -> clans.clanOf(target.uuid())).map(clan -> "[" + clan.tag() + "] " + clan.name());
@@ -57,6 +68,14 @@ final class Integrations {
     private static final class Inventories {
         static void open(Player viewer, Target target) {
             SyncApi.get().ifPresent(sync -> sync.openHistory(viewer, target.name()));
+        }
+
+        static Optional<ItemStack[]> last(Target target) {
+            return SyncApi.get().flatMap(sync -> sync.lastInventory(target.uuid()));
+        }
+
+        static Optional<ItemStack[]> lastEnder(Target target) {
+            return SyncApi.get().flatMap(sync -> sync.lastEnderChest(target.uuid()));
         }
     }
 }

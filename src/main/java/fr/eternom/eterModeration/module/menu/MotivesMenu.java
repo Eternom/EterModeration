@@ -30,7 +30,7 @@ import java.util.Map;
 class MotivesMenu implements Menu {
 
     private static final Map<Integer, SanctionType> FREE = Map.of(47, SanctionType.WARN, 48, SanctionType.MUTE,
-            50, SanctionType.BAN);
+            50, SanctionType.KICK, 51, SanctionType.BAN);
     private static final int BACK = 49;
 
     private final ModGui gui;

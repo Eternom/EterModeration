@@ -39,13 +39,22 @@ public final class Motives {
     /** L'ancienne prison, supprimée : une étape « jail » d'une vieille config devient un ban de même durée. */
     private static final String LEGACY_JAIL = "jail";
 
-    private final Map<String, Motive> motives;
+    private volatile Map<String, Motive> motives;
 
     private Motives(Map<String, Motive> motives) {
         this.motives = motives;
     }
 
     public static Motives load(ConfigurationSection section, Logger logger) {
+        return new Motives(parse(section, logger));
+    }
+
+    /** /mod reload : le barème relu (les sanctions déjà données ne changent pas). */
+    public void reload(ConfigurationSection section, Logger logger) {
+        this.motives = parse(section, logger);
+    }
+
+    private static Map<String, Motive> parse(ConfigurationSection section, Logger logger) {
         Map<String, Motive> motives = new LinkedHashMap<>();
         if (section != null) {
             for (String id : section.getKeys(false)) {
@@ -69,7 +78,7 @@ public final class Motives {
                 }
             }
         }
-        return new Motives(motives);
+        return motives;
     }
 
     public List<Motive> all() {

@@ -20,6 +20,15 @@ import fr.eternom.eterModeration.module.staff.Freeze;
 import fr.eternom.eterModeration.module.staff.StaffInventories;
 import fr.eternom.eterModeration.module.staff.BlockLog;
 import fr.eternom.eterModeration.module.staff.StaffMode;
+import fr.eternom.eterModeration.module.staff.StaffLog;
+import fr.eternom.eterModeration.module.staff.StaffRegistry;
+import fr.eternom.eterModeration.module.staff.ContainerLog;
+import fr.eternom.eterModeration.module.sanction.PendingBans;
+import fr.eternom.eterModeration.module.sanction.PlayerNotices;
+import fr.eternom.eterModeration.module.alert.JoinWatch;
+import fr.eternom.eterModeration.module.alert.MiningAlerts;
+import fr.eternom.eterModeration.module.menu.InventoryCompare;
+import fr.eternom.eterLib.helper.cache.RedisCache;
 import fr.eternom.eterModeration.module.sanction.Enforcement;
 import fr.eternom.eterModeration.module.sanction.Labels;
 import fr.eternom.eterModeration.module.sanction.Motives;
@@ -61,6 +70,16 @@ public final class Main extends JavaPlugin {
     private RecordListener recordListener;
     private Freeze freeze;
     private StaffMode staffMode;
+    private Motives motives;
+    private ChatFilter chatFilter;
+
+    /** /mod reload : config.yml relu ; le barème et le filtre changent tout de suite (le reste au redémarrage). */
+    public void reload() {
+        reloadConfig();
+        motives.reload(getConfig().getConfigurationSection("motives"), getLogger());
+        registerMotivePermissions(motives);
+        chatFilter.reload(getConfig().getConfigurationSection("filter"));
+    }
 
     @Override
     public void onEnable() {
@@ -81,41 +100,62 @@ public final class Main extends JavaPlugin {
         NetworkBus bus = lib.network(this, "etermoderation", messages);
         String server = lib.getServerName();
 
-        Motives motives = Motives.load(getConfig().getConfigurationSection("motives"), getLogger());
+        RedisCache redis = lib.getRedis();
+        motives = Motives.load(getConfig().getConfigurationSection("motives"), getLogger());
         registerMotivePermissions(motives);
         Labels labels = new Labels(messages);
-        SanctionRepository sanctionRepository = new SanctionRepository(database);
+        SanctionRepository sanctionRepository = new SanctionRepository(database, getConfig().getInt("recidivism-months", 6));
         Records records = new Records(database);
-        StaffAlerts alerts = new StaffAlerts(bus, messages);
+        StaffAlerts alerts = new StaffAlerts(this, bus, messages);
+        StaffLog staffLog = new StaffLog(this, database, server);
+        StaffRegistry registry = new StaffRegistry(this, redis);
         Enforcement enforcement = new Enforcement(this, sanctionRepository, bus);
-        SanctionService sanctions = new SanctionService(this, sanctionRepository, enforcement, alerts, bus, messages, labels, server);
+        SanctionService sanctions = new SanctionService(this, sanctionRepository, enforcement, alerts, bus, messages, labels, server,
+                registry, staffLog, records, redis, new PendingBans(database), getConfig());
+        PlayerNotices notices = new PlayerNotices(this, redis, sanctionRepository, messages, labels);
+        enforcement.setNotices(notices);
         AppealService appeals = new AppealService(this, new AppealRepository(database), sanctions, alerts, bus, messages, labels);
         Set<String> privateCommands = lower(getConfig().getStringList("private-commands"));
-        freeze = new Freeze(this, lib.getRedis(), bus, alerts, messages, privateCommands);
-        ReportService reports = new ReportService(this, new ReportRepository(database), lib.getRedis(), bus, alerts, messages, server,
-                getConfig().getConfigurationSection("reports"));
-        gui = new ModGui(this, sanctions, appeals, records, motives, lib.getPlayers(), messages, labels, reports, freeze);
-        // Qui a posé ou cassé chaque bloc, dans Redis pour block-log.days jours (0 = désactivé) : l'Inspecteur du mode staff
+        freeze = new Freeze(this, redis, bus, alerts, messages, privateCommands, registry, records, staffLog, lib.getPlayers(), sanctions,
+                motives, getConfig().getConfigurationSection("freeze"));
+        ReportService reports = new ReportService(this, new ReportRepository(database), redis, bus, alerts, messages, server,
+                getConfig().getConfigurationSection("reports"), records, staffLog);
+        JoinWatch watch = new JoinWatch(this, redis, records, sanctionRepository, alerts);
+        InventoryCompare compare = new InventoryCompare(this, redis, messages);
+        gui = new ModGui(this, sanctions, appeals, records, motives, lib.getPlayers(), messages, labels, reports, freeze, staffLog, watch,
+                compare);
+        // Qui a posé ou cassé chaque bloc (et pris quoi dans quel coffre), dans Redis pour block-log.days jours (0 = désactivé)
         int blockLogDays = getConfig().getInt("block-log.days", 7);
-        BlockLog blockLog = blockLogDays > 0 ? new BlockLog(this, lib.getRedis(), messages, server, blockLogDays) : null;
+        BlockLog blockLog = blockLogDays > 0 ? new BlockLog(this, redis, messages, server, blockLogDays) : null;
+        ContainerLog containerLog = blockLogDays > 0 ? new ContainerLog(this, redis, messages, server, blockLogDays) : null;
+        PluginManager plugins = getServer().getPluginManager();
         if (blockLog != null) {
-            getServer().getPluginManager().registerEvents(blockLog, this);
+            plugins.registerEvents(blockLog, this);
+            plugins.registerEvents(containerLog, this);
             blockLog.start();
         }
-        staffMode = new StaffMode(this, lib.getRedis(), new StaffInventories(database), freeze, gui, alerts, messages,
-                getConfig().getStringList("staff.blocked-servers"), blockLog);
+        staffMode = new StaffMode(this, redis, new StaffInventories(database), freeze, gui, alerts, messages,
+                getConfig().getStringList("staff.blocked-servers"), blockLog, containerLog, staffLog);
 
         muteGuard = new MuteGuard(enforcement, messages, labels, privateCommands);
-        filterListener = new FilterListener(this, new ChatFilter(getConfig().getConfigurationSection("filter")), sanctions, motives,
-                alerts, messages, privateCommands, getConfig().getConfigurationSection("filter"));
+        chatFilter = new ChatFilter(getConfig().getConfigurationSection("filter"));
+        filterListener = new FilterListener(this, chatFilter, sanctions, motives, alerts, messages, privateCommands,
+                getConfig().getConfigurationSection("filter"));
         recordListener = new RecordListener(this, records, server, privateCommands);
+        plugins.registerEvents(registry, this);
+        plugins.registerEvents(notices, this);
+        plugins.registerEvents(watch, this);
+        plugins.registerEvents(compare, this);
+        plugins.registerEvents(new MiningAlerts(alerts, getConfig().getConfigurationSection("xray")), this);
 
         int keepDays = Math.max(1, getConfig().getInt("chat-log.days", 30));
+        int staffLogDays = Math.max(1, getConfig().getInt("staff-log.days", 90));
         getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
             try {
                 records.purgeChat(keepDays);
+                staffLog.purge(staffLogDays);
             } catch (RuntimeException e) {
-                getLogger().warning("Journal du chat non purgé : " + e.getMessage());
+                getLogger().warning("Journaux non purgés : " + e.getMessage());
             }
         }, 20L * 60, DAY_TICKS);
 

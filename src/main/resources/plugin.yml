@@ -45,11 +45,17 @@ permissions:
   eter.mod.warn:
     description: Donner un avertissement.
     default: op
+  eter.mod.kick:
+    description: Expulser du réseau (il peut revenir tout de suite).
+    default: op
   eter.mod.mute:
-    description: Rendre muet (chat et messages privés).
+    description: Rendre muet (chat, messages privés, panneaux, livres, enclume).
     default: op
   eter.mod.ban:
-    description: Bannir du réseau, temporairement ou définitivement.
+    description: Bannir du réseau, temporairement (définitivement avec eter.mod.permanent).
+    default: op
+  eter.mod.ban.alts:
+    description: Étendre le ban d'un joueur à ses comptes liés.
     default: op
   eter.mod.motive.*:
     description: Utiliser tous les motifs du barème (sinon eter.mod.motive.<motif>, un par un).
@@ -58,10 +64,16 @@ permissions:
     description: Sanction libre, hors barème (durée et raison au choix).
     default: op
   eter.mod.permanent:
-    description: Sanction définitive (étape « perm » du barème, ou sanction libre).
+    description: 'Sanction définitive (étape « perm » du barème, ou libre), et valider le ban définitif demandé par un autre.'
     default: op
   eter.mod.lift:
     description: Lever une sanction en cours.
+    default: op
+  eter.mod.change:
+    description: Changer la durée d'une sanction en cours.
+    default: op
+  eter.mod.sanction.staff:
+    description: Sanctionner quand même un membre du staff protégé (eter.mod.protected).
     default: op
   eter.mod.appeals:
     description: Traiter les appels.
@@ -78,13 +90,22 @@ permissions:
   eter.mod.alts:
     description: Voir les comptes liés (même connexion).
     default: op
+  eter.mod.invsee:
+    description: 'Voir en lecture seule l''inventaire complet et le coffre de l''Ender d''un joueur, et le comparer à la veille.'
+    default: op
+  eter.mod.watch:
+    description: Mettre un joueur sous surveillance (le staff est prévenu à chacune de ses arrivées).
+    default: op
   eter.mod.staff:
     description: 'Mode staff (/staff) : invisible sur tout le réseau, outils ; aller voir un joueur depuis sa fiche.'
     default: op
     children:
-      eter.mod.freeze.exempt: true
-  eter.mod.freeze.exempt:
-    description: 'Ne peut pas être gelé (le staff : donnée avec eter.mod.staff).'
+      eter.mod.protected: true
+  eter.mod.spectate:
+    description: Suivre un joueur en spectateur (outil Fiche du mode staff, accroupi).
+    default: op
+  eter.mod.protected:
+    description: 'Staff protégé : ne peut être ni gelé, ni sanctionné sans eter.mod.sanction.staff (donnée avec eter.mod.staff).'
     default: op
   eter.mod.freeze:
     description: Geler un joueur (il ne bouge plus, pour lui parler).
@@ -95,8 +116,17 @@ permissions:
   eter.mod.alerts:
     description: Recevoir les alertes de modération du réseau.
     default: op
+  eter.mod.staffstats:
+    description: Les statistiques du staff (/mod).
+    default: op
+  eter.mod.reload:
+    description: '/mod reload : relire le barème et le filtre.'
+    default: op
   eter.mod.bypass.filter:
-    description: Pas de filtre du chat.
+    description: Pas de filtre du chat (ni des panneaux, livres, enclume).
+    default: op
+  eter.mod.bypass.xray:
+    description: Pas d'alerte de minage suspect.
     default: op
   eter.mod.*:
     description: Toutes les permissions de modération.
@@ -105,22 +135,32 @@ permissions:
       eter.mod.appeal: true
       eter.mod.report: true
       eter.mod.staff: true
+      eter.mod.spectate: true
+      eter.mod.protected: true
       eter.mod.freeze: true
-      eter.mod.freeze.exempt: true
       eter.mod.reports: true
       eter.vanish.see: true
       eter.mod.use: true
       eter.mod.warn: true
+      eter.mod.kick: true
       eter.mod.mute: true
       eter.mod.ban: true
+      eter.mod.ban.alts: true
       eter.mod.motive.*: true
       eter.mod.free: true
       eter.mod.permanent: true
       eter.mod.lift: true
+      eter.mod.change: true
+      eter.mod.sanction.staff: true
       eter.mod.appeals: true
       eter.mod.history: true
       eter.mod.notes: true
       eter.mod.chatlog: true
       eter.mod.alts: true
+      eter.mod.invsee: true
+      eter.mod.watch: true
       eter.mod.alerts: true
+      eter.mod.staffstats: true
+      eter.mod.reload: true
       eter.mod.bypass.filter: true
+      eter.mod.bypass.xray: true

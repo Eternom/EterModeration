@@ -5,6 +5,7 @@
 
 # Les types de sanction et les motifs du barème (config.yml > motives : un nom par motif).
 type:
+  kick: "Expulsion"
   warn: "Avertissement"
   mute: "Mute"
   ban: "Ban"
@@ -22,10 +23,16 @@ motive:
   # Ancien motif (prison supprimée) : seulement pour l'historique
   escape: "Évasion (ancien motif)"
   evasion: "Contournement de sanction"
+  freeze-logout: "Déconnexion pendant un gel"
 length:
   permanent: "définitive"
 
 sanction:
+  protected: "<error><accent><player></accent> fait partie du staff : seul un superviseur peut le sanctionner."
+  approval-requested: "<info>Ban définitif demandé : c'est un ban de <accent><time></accent> en attendant qu'un autre membre du staff le valide (<accent>/mod</accent>)."
+  approval-self: "<error>Un autre membre du staff doit valider ton propre ban définitif."
+  approval-done: "<error>Cette demande a déjà été traitée."
+  changed: "<success>✔</success> <info>Sanction de <accent><player></accent> : nouvelle durée <accent><time></accent>."
   no-permission: "<error>Tu n'as pas la permission pour cette action."
   reason-required: "<error>Une sanction libre doit avoir une raison."
   bad-duration: "<error>Durée illisible : <accent>30m</accent>, <accent>2h</accent>, <accent>3d</accent>, <accent>2w</accent> ou <accent>perm</accent>."
@@ -46,6 +53,8 @@ sanction:
 
 # Ce que reçoit le joueur sanctionné (où qu'il soit sur le réseau)
 notify:
+  kick: "<error>Tu es expulsé du réseau</error> <info>(<accent><motive></accent>). <reason>"
+  changed: "<info>La durée de ta sanction (<type>) a changé : <accent><time></accent>. <dark_gray>Tes sanctions : <click:run_command:'/appel'><accent>/appel</accent></click>"
   report-closed: "<info>Ton signalement contre <accent><player></accent> a été traité par le staff. Merci !"
   warn: "<error>Avertissement</error> <info>pour <accent><motive></accent>. <reason> <dark_gray>Le prochain sera plus lourd. Tes sanctions : <click:run_command:'/appel'><accent>/appel</accent></click>"
   mute: "<error>Tu es muet pour <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Ni chat ni messages privés. Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
@@ -58,6 +67,7 @@ mute:
   blocked: "<error>Tu es muet encore <accent><time></accent> (<motive>).</error> <dark_gray>Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
 
 filter:
+  advert: "<error>Pas de publicité : les adresses de serveurs et de sites sont interdites."
   spam: "<error>Doucement : trop de messages d'un coup."
   repeat: "<error>Inutile de répéter le même message."
   caps: "<error>Moins de majuscules, s'il te plaît."
@@ -73,6 +83,16 @@ appeal:
 
 # Alertes au staff (eter.mod.alerts), sur tout le réseau
 alert:
+  approval-needed: "<accent><staff></accent> <info>demande un ban définitif de <accent><player></accent> <dark_gray>(n°<id>)</dark_gray> : à valider dans <click:run_command:'/mod'><accent>/mod</accent></click>"
+  approved: "<accent><staff></accent> <info>a validé le ban définitif de <accent><player></accent> demandé par <accent><requester></accent> <dark_gray>(n°<id>)"
+  refused: "<accent><staff></accent> <info>a refusé le ban définitif de <accent><player></accent> demandé par <accent><requester></accent> <dark_gray>(n°<id>, le ban temporaire reste)"
+  changed: "<accent><staff></accent> <info>a changé la durée de la sanction de <accent><player></accent> (<type>) : <accent><time>"
+  freeze-expired: "<info>Le gel de <accent><player></accent> (par <accent><staff></accent>) a pris fin seul après <accent><minutes></accent> min."
+  frozen-chat: "<error>[Gel]</error> <accent><player></accent> <dark_gray>»</dark_gray> <white><message>"
+  filter-advert: "<accent><player></accent> <info>a écrit une publicité : <dark_gray><message>"
+  xray: "<error>Minage suspect</error> <info>: <accent><player></accent> a trouvé <accent><veins></accent> filons rares pour <accent><stone></accent> blocs de pierre en moins d'une heure. <dark_gray>À vérifier (inspecteur, spectateur)."
+  watch-join: "<info>Joueur surveillé connecté : <accent><player></accent> <dark_gray>(par <staff> : <reason>)"
+  alt-of-banned: "<error>Compte lié à un banni</error> <info>: <accent><player></accent> partage une connexion avec <accent><alts></accent>. <dark_gray>Contournement possible."
   prefix: "<error>[Mod]</error> "
   report: "<info><accent><player></accent> signale <accent><target></accent> : <reason> <dark_gray><text></dark_gray> <click:run_command:'/mod'><accent>/mod</accent></click>"
   frozen: "<accent><staff></accent> <info>a gelé <accent><player>"
@@ -99,6 +119,16 @@ menu:
   back-to-player: "<accent>« Fiche de <player>"
 
 staff:
+  pending:
+    name: "<accent>Bans définitifs à valider <dark_gray>(<count>)"
+    lore: "<dark_gray>▸ <info>Demandés par un autre membre du staff"
+  stats:
+    name: "<accent>Statistiques du staff"
+    lore: "<dark_gray>▸ <info>30 derniers jours, dans le chat"
+  fly-speed: "<info>Vitesse de vol : <accent><speed>"
+  night-vision-on: "<success>Vision de nuit"
+  night-vision-off: "<info>Vision de nuit coupée"
+  spectating: "<info>Tu suis <accent><player></accent> <dark_gray>· accroupis-toi pour sortir"
   title: "<primary>Modération"
   not-here: "<error>Pas de mode staff sur ce serveur (passe par un serveur normal)."
   "on": "<success>Mode staff activé.</success> <info>Tu es <accent>invisible</accent>, ton inventaire est mis de côté. <accent>/staff</accent> pour en sortir."
@@ -121,6 +151,23 @@ staff:
     lore: "<dark_gray>▸ <info>Sur tout le réseau"
 
 player:
+  frozen: "<error>❄ Gelé</error> <info>par <accent><staff></accent> depuis <accent><time>"
+  watched: "<error>Surveillé</error> <info>par <accent><staff></accent> : <reason>"
+  watch:
+    name: "<accent>Surveiller"
+    lore: "<dark_gray>▸ <info>Le staff est prévenu à chacune de ses arrivées"
+  unwatch:
+    name: "<accent>Ne plus surveiller"
+    lore: "<dark_gray>▸ <info>Il est surveillé en ce moment"
+  ender:
+    name: "<accent>Coffre de l'Ender"
+    lore: "<dark_gray>▸ <info>En lecture seule"
+  full-inventory:
+    name: "<accent>Inventaire complet"
+    lore: "<dark_gray>▸ <info>Armure et seconde main comprises, en lecture seule"
+  compare:
+    name: "<accent>Comparer avec la veille"
+    lore: "<dark_gray>▸ <info>Ce qui a le plus changé (duplication ?)"
   title: "<primary>Fiche de <player>"
   name: "<accent><player>"
   online: "<success>●</success> <info>Connecté sur <accent><server>"
@@ -169,6 +216,8 @@ motives:
     lore: "<dark_gray>▸ <info>Hors barème : durée et raison au choix"
 
 history:
+  evidence: "<dark_gray>▸ <info>Preuves jointes <dark_gray>(touche 1-9)"
+  click-change: "<dark_gray>▸ <info>Clic droit : changer la durée"
   title: "<primary>Historique de <player> <dark_gray>(<count>)"
   click-lift: "<dark_gray>▸ <info>Clic : lever la sanction"
   empty: "<success>Aucune sanction"
@@ -183,6 +232,11 @@ notes:
     lore: "<dark_gray>▸ <info>Visible du staff seulement"
 
 alts:
+  not-banned: "<error><accent><player></accent> n'est pas banni en ce moment."
+  ban-reason: "Compte lié à <player> (contournement)"
+  ban:
+    name: "<error>Étendre son ban aux comptes liés"
+    lore: "<dark_gray>▸ <info>Même fin que son ban"
   title: "<primary>Comptes liés à <player>"
   name: "<accent><player>"
   last-seen: "<dark_gray>▸ <info>Vu le <accent><date>"
@@ -212,6 +266,16 @@ my:
   empty: "<success>Aucune sanction en cours"
 
 dialogs:
+  watch:
+    title: "<primary>Surveiller <player>"
+    body: "<info>Le staff sera prévenu à chacune de ses arrivées sur le réseau. Pourquoi ?"
+    label: "Raison"
+    button: "Surveiller"
+  change:
+    title: "<primary>Durée de la sanction"
+    body: "<info><type> n°<id> de <accent><player></accent> : sa nouvelle durée totale, depuis le moment où elle a été donnée (30m, 2h, 3d, 2w ou perm)."
+    label: "Durée"
+    button: "Changer"
   report-who:
     title: "<primary>Signaler un joueur"
     body: "<info>Son pseudo. Un faux signalement peut être sanctionné."
@@ -260,6 +324,18 @@ dialogs:
     button: "Envoyer"
 
 confirm:
+  approve:
+    title: "<primary>Valider le ban définitif"
+    body: "<info>Ban de <accent><player></accent> (n°<id>), demandé par <accent><staff></accent> : il devient définitif."
+    button: "Valider"
+  refuse:
+    title: "<primary>Refuser le ban définitif"
+    body: "<info>Ban de <accent><player></accent> (n°<id>), demandé par <accent><staff></accent> : il reste temporaire."
+    button: "Refuser"
+  ban-alts:
+    title: "<primary>Bannir les comptes liés"
+    body: "<info>Les <accent><count></accent> comptes liés à <accent><player></accent> reçoivent un ban de même fin. Un indice, pas une preuve : vérifie avant."
+    button: "Bannir"
   lift:
     title: "<primary>Lever la sanction #<id>"
     body: "<info><accent><type></accent> de <accent><player></accent> : elle prend fin tout de suite et ne compte plus pour la récidive."
@@ -270,6 +346,12 @@ confirm:
     button: "Effacer"
 
 freeze:
+  title: "<error><bold>GELÉ"
+  subtitle: "<info>Ne te déconnecte pas : le staff va te parler"
+  chat-sent: "<dark_gray>[Au staff]</dark_gray> <white><message>"
+  note-frozen: "Gelé"
+  note-unfrozen: "Dégelé"
+  quit-reason: "Déconnexion pendant un gel"
   bar: "<error>Tu es gelé</error> <dark_gray>· <info>ne te déconnecte pas, un membre du staff va te parler"
   frozen: "<error>Tu es gelé par le staff.</error> <info>Ne te déconnecte pas : un membre du staff va te parler en message privé."
   unfrozen: "<success>Tu n'es plus gelé.</success>"
@@ -280,6 +362,14 @@ freeze:
 
 # Les outils du mode staff (barre d'action)
 block-log:
+  area-header: "<info>Autour de <accent><x> <y> <z></accent> <dark_gray>(rayon <radius>)</dark_gray> :"
+  at: "<dark_gray><where> "
+  poured: "<dark_gray>▸ <accent><block></accent> <error>versée</error> <info>par <accent><player></accent> <dark_gray>(<ago>)"
+  fire: "<dark_gray>▸ <error>Feu</error> <info>mis par <accent><player></accent> <dark_gray>(<ago>)"
+  tnt: "<dark_gray>▸ <error>TNT</error> <info>allumée par <accent><player></accent> <dark_gray>(<ago>)"
+  sign: "<dark_gray>▸ <info>Panneau écrit par <accent><player></accent> <dark_gray>(<ago>)</dark_gray> : <white><text>"
+  killed: "<dark_gray>▸ <accent><block></accent> <error>tué</error> <info>par <accent><player></accent> <dark_gray>(<ago>)"
+  hanging: "<dark_gray>▸ <accent><block></accent> <error>cassé</error> <info>par <accent><player></accent> <dark_gray>(<ago>)"
   header: "<info>Bloc <accent><x> <y> <z></accent> :"
   empty: "<dark_gray>▸ <info>Rien noté ces <accent><days></accent> derniers jours (bloc naturel, ou plus ancien)."
   placed: "<dark_gray>▸ <accent><block></accent> <info>posé par <accent><player></accent> <dark_gray>(<ago>)"
@@ -289,9 +379,15 @@ block-log:
   ago-days: "il y a <amount> j"
 
 staff-tool:
+  chest:
+    name: "<accent>Loupe à coffres"
+    lore: "<dark_gray>▸ <info>Clic droit : le contenu, sans rien toucher · accroupi : qui a pris ou mis quoi"
+  options:
+    name: "<accent>Options"
+    lore: "<dark_gray>▸ <info>Clic droit : vision de nuit · accroupi : vitesse de vol"
   profile:
     name: "<accent>Fiche du joueur"
-    lore: "<dark_gray>▸ <info>Clic droit sur un joueur"
+    lore: "<dark_gray>▸ <info>Clic droit sur un joueur : sa fiche · accroupi : le suivre en spectateur"
   freeze:
     name: "<accent>Geler / dégeler"
     lore: "<dark_gray>▸ <info>Clic droit sur un joueur"
@@ -300,7 +396,7 @@ staff-tool:
     lore: "<dark_gray>▸ <info>Clic droit : téléporté près d'un joueur du réseau"
   inspect:
     name: "<accent>Inspecteur"
-    lore: "<dark_gray>▸ <info>Clic droit sur un bloc : qui l'a posé ou cassé"
+    lore: "<dark_gray>▸ <info>Clic droit sur un bloc : qui l'a posé ou cassé · accroupi : tout ce qui s'est passé autour"
   vanish:
     name: "<accent>Visible / invisible"
     lore: "<dark_gray>▸ <info>Clic droit"
@@ -312,6 +408,11 @@ staff-tool:
     lore: "<dark_gray>▸ <info>Clic droit : ton inventaire est rendu"
 
 report:
+  blocked: "<error>Trop de tes signalements étaient faux : tu ne peux plus signaler pour le moment."
+  claimed-by: "<error>Déjà pris en charge par <accent><staff></accent>."
+  claimed: "<success>✔</success> <info>Tu t'occupes du signalement contre <accent><player></accent>."
+  unclaimed: "<info>Tu ne t'occupes plus du signalement contre <accent><player></accent>."
+  closed-false: "<success>✔</success> <info>Signalement contre <accent><player></accent> classé comme faux."
   title: "<primary>Signaler <player>"
   head: "<accent><player>"
   head-lore: "<dark_gray>▸ <info>Choisis le motif"
@@ -333,10 +434,84 @@ report-reason:
   other: "Autre"
 
 reports:
+  claimed: "<dark_gray>▸ <info>Pris en charge par <accent><staff>"
+  evidence: "<dark_gray>▸ <info>Preuves jointes <dark_gray>(touche 1-9)"
   title: "<primary>Signalements <dark_gray>(<count>)"
   name: "<accent><player>"
   reason: "<dark_gray>▸ <info>Motif : <accent><reason>"
   details: "<dark_gray>▸ <info>« <text> »"
   by: "<dark_gray>▸ <info>Par <accent><player></accent> le <accent><date></accent> <dark_gray>(<server>)"
-  click: "<dark_gray>▸ <info>Clic gauche : aller le voir · clic droit : traité · shift : sa fiche"
+  click: "<dark_gray>▸ <info>Gauche : aller le voir · droit : fondé · shift droit : faux · shift gauche : sa fiche · Q : le prendre · 1-9 : preuves"
   empty: "<success>Aucun signalement"
+
+# Ce que le joueur voit à son arrivée
+notice:
+  returning: "<info>Content de te revoir. Ton ban est terminé : relis les règles sur le site pour que ça ne se reproduise pas."
+  warn:
+    title: "<error>Avertissement"
+    body: "<info>Tu as reçu un avertissement pour <accent><motive></accent>. <reason><newline><newline>Le prochain sera plus lourd. Tes sanctions : <accent>/appel</accent>"
+    accept: "J'ai compris"
+    later: "Plus tard"
+
+# Le journal des coffres (loupe du mode staff, accroupi)
+container-log:
+  header: "<info>Coffre <accent><x> <y> <z></accent> :"
+  empty: "<dark_gray>▸ <info>Rien de pris ni de mis ces <accent><days></accent> derniers jours."
+  line: "<dark_gray>▸ <accent><player></accent> <changes> <dark_gray>(<ago>)"
+
+# Copies en lecture seule
+chest-view:
+  title: "<primary>Coffre <dark_gray>(<x> <y> <z>) · lecture seule"
+view:
+  ender: "<primary>Ender de <player> <dark_gray>· lecture seule"
+  inventory: "<primary>Inventaire de <player> <dark_gray>· lecture seule"
+  none: "<error>Aucune sauvegarde pour <accent><player></accent>."
+
+# Comparer l'inventaire avec la veille
+compare:
+  none: "<error>Pas encore de photo d'au moins un jour pour <accent><player></accent>."
+  header: "<info>Contenu de <accent><player></accent> comparé à il y a <accent><days></accent> j :"
+  same: "<dark_gray>▸ <info>Rien n'a changé."
+  more: "<dark_gray>▸ <success>+<amount></success> <item>"
+  less: "<dark_gray>▸ <error>-<amount></error> <item>"
+
+# Surveillance (fiche du joueur)
+watch:
+  on: "<success>✔</success> <info><accent><player></accent> est sous surveillance."
+  off: "<success>✔</success> <info><accent><player></accent> n'est plus surveillé."
+  note: "Mis sous surveillance : <reason>"
+
+# Preuves jointes (sanctions, signalements)
+evidence:
+  empty: "<error>Aucune preuve jointe."
+  header: "<info>Preuves jointes <dark_gray>(<player>)</dark_gray> :"
+  line: "<dark_gray>▸ <white><line>"
+
+# Bans définitifs à valider
+pending:
+  title: "<primary>Bans à valider <dark_gray>(<count>)"
+  requested: "<dark_gray>▸ <info>Demandé par <accent><staff></accent> le <accent><date>"
+  click: "<dark_gray>▸ <info>Clic gauche : valider · droit : refuser · 1-9 : preuves"
+  empty: "<success>Aucun ban à valider."
+
+# Statistiques du staff (30 jours)
+staff-stats:
+  header: "<info>Le staff, ces 30 derniers jours :"
+  empty: "<info>Aucune action du staff ces 30 derniers jours."
+  line: "<dark_gray>▸ <accent><staff></accent> <dark_gray>: <info><detail>"
+staff-action:
+  sanction: "sanctions"
+  lift: "levées"
+  change: "durées changées"
+  freeze: "gels"
+  unfreeze: "dégels"
+  invsee: "inventaires vus"
+  chest: "coffres vus"
+  teleport: "téléportations"
+  staff_mode: "mode staff"
+  spectate: "spectateur"
+  report: "signalements traités"
+  appeal: "appels traités"
+
+reload:
+  done: "<success>✔</success> <info>Barème et filtre relus (config.yml)."

@@ -40,6 +40,13 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.block.Block;
+import org.bukkit.block.Container;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
+import fr.eternom.eterModeration.module.menu.ReadOnlyView;
+import java.util.Map;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +61,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * (StaffInventories) et rendu à la sortie, le joueur devient invisible (EterLib Vanish), vole, ne prend pas de coups,
  * n'a pas faim, n'est pas ciblé par les monstres, ne ramasse rien (ni objets ni expérience), ne déclenche ni plaques,
  * ni fils, ni capteurs de sculk, et ne fait pas apparaître de monstres autour de lui. Une barre d'outils : fiche d'un joueur, geler, joueur au hasard,
- * inspecteur (qui a posé ou cassé un bloc, BlockLog), visible/invisible, signalements, quitter. L'état est gardé dans Redis (etermod:staff) : il suit le joueur d'un serveur
+ * inspecteur (BlockLog : ce bloc, ou accroupi toute la zone), visible/invisible, loupe à coffres (copie en lecture seule ;
+ * accroupi : qui a pris ou mis quoi, ContainerLog), options (vision de nuit ; accroupi : vitesse de vol), signalements,
+ * quitter. Fiche accroupi sur un joueur : le suivre en spectateur (eter.mod.spectate). L'état est gardé dans Redis (etermod:staff) : il suit le joueur d'un serveur
  * à l'autre (outils rendus par EterSync, ou redonnés s'ils manquent) et d'une connexion à l'autre. À l'arrivée, la
  * protection (vol, invulnérabilité) revient tout de suite : sans elle, il tomberait pendant le chargement de l'inventaire.
  * On n'entre ni ne sort du mode sur un serveur de staff.blocked-servers (un serveur sans EterSync : l'inventaire
@@ -64,13 +73,14 @@ public class StaffMode implements Listener {
 
     public static final String PERMISSION = "eter.mod.staff";
     public static final String KEY = "etermod:staff";
+    public static final String SPECTATE_PERMISSION = "eter.mod.spectate";
     /** Après l'arrivée : laisser EterSync rendre l'inventaire avant de vérifier les outils. */
     private static final long JOIN_DELAY_TICKS = 60;
 
     /** Les outils et leur case dans la barre. */
     private enum Tool {
         PROFILE(0, Material.BOOK), FREEZE(1, Material.STICK), RANDOM(2, Material.COMPASS), INSPECT(3, Material.SPYGLASS),
-        VANISH(4, Material.GRAY_DYE),
+        VANISH(4, Material.GRAY_DYE), CHEST(5, Material.ENDER_EYE), OPTIONS(6, Material.COMPARATOR),
         REPORTS(7, Material.PAPER), LEAVE(8, Material.RED_DYE);
 
         final int slot;
@@ -101,10 +111,17 @@ public class StaffMode implements Listener {
     private final Set<UUID> active = ConcurrentHashMap.newKeySet();
     /** Entrée ou sortie en cours (base) : un second clic attend. */
     private final Set<UUID> busy = ConcurrentHashMap.newKeySet();
+    /** Membres du staff en spectateur sur un joueur, et leur mode de jeu d'avant. */
+    private final Map<UUID, GameMode> spectating = new ConcurrentHashMap<>();
+    /** Journal des coffres (outil Loupe, accroupi), null s'il est désactivé. */
+    private final ContainerLog containerLog;
+    private final StaffLog staffLog;
 
     public StaffMode(JavaPlugin plugin, RedisCache redis, StaffInventories inventories, Freeze freeze, ModGui gui, StaffAlerts alerts,
-                     Messages messages, List<String> blockedServers, BlockLog blockLog) {
+                     Messages messages, List<String> blockedServers, BlockLog blockLog, ContainerLog containerLog, StaffLog staffLog) {
         this.blockLog = blockLog;
+        this.containerLog = containerLog;
+        this.staffLog = staffLog;
         this.plugin = plugin;
         this.redis = redis;
         this.inventories = inventories;
@@ -155,6 +172,7 @@ public class StaffMode implements Listener {
             protect(player);
             giveTools(player);
             messages.send(player, "staff.on");
+            staffLog.log(player.getName(), StaffLog.Action.STAFF_MODE, "");
             alerts.alert("alert.staff-on", "staff", player.getName());
         }, () -> {
             busy.remove(uuid);
@@ -171,6 +189,12 @@ public class StaffMode implements Listener {
         }, contents -> {
             busy.remove(uuid);
             active.remove(uuid);
+            GameMode previous = spectating.remove(uuid);
+            if (previous != null) {
+                player.setGameMode(previous);
+            }
+            player.removePotionEffect(PotionEffectType.NIGHT_VISION);
+            player.setFlySpeed(0.1f);
             player.getInventory().clear();
             contents.ifPresent(bytes -> player.getInventory().setContents(ItemStack.deserializeItemsFromBytes(bytes)));
             if (player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE) {
@@ -265,7 +289,10 @@ public class StaffMode implements Listener {
             return;
         }
         Tool tool = tool(staff.getInventory().getItemInMainHand());
-        if (tool == Tool.PROFILE) {
+        if (tool == Tool.PROFILE && staff.isSneaking()) {
+            event.setCancelled(true);
+            spectate(staff, target);
+        } else if (tool == Tool.PROFILE) {
             event.setCancelled(true);
             gui.openPlayer(staff, new Target(target.getUniqueId(), target.getName()));
         } else if (tool == Tool.FREEZE) {
@@ -299,12 +326,79 @@ public class StaffMode implements Listener {
             case REPORTS -> gui.openReports(staff);
             case INSPECT -> {
                 if (blockLog != null && event.getClickedBlock() != null) {
-                    blockLog.inspect(staff, event.getClickedBlock());
+                    if (staff.isSneaking()) {
+                        blockLog.inspectArea(staff, event.getClickedBlock());
+                    } else {
+                        blockLog.inspect(staff, event.getClickedBlock());
+                    }
+                }
+            }
+            case CHEST -> {
+                Block block = event.getClickedBlock();
+                if (block != null && block.getState(false) instanceof Container container) {
+                    if (staff.isSneaking()) {
+                        if (containerLog != null) {
+                            containerLog.inspect(staff, block);
+                        }
+                    } else {
+                        // Une copie : le vrai coffre ne s'ouvre pas (ni animation ni son pour les joueurs autour)
+                        staffLog.log(staff.getName(), StaffLog.Action.CHEST, block.getWorld().getName() + " " + block.getX()
+                                + " " + block.getY() + " " + block.getZ());
+                        ReadOnlyView.open(staff, messages.get(staff, "chest-view.title", "x", String.valueOf(block.getX()),
+                                "y", String.valueOf(block.getY()), "z", String.valueOf(block.getZ())), container.getInventory().getContents());
+                    }
+                }
+            }
+            case OPTIONS -> {
+                if (staff.isSneaking()) {
+                    float speed = staff.getFlySpeed() >= 0.29f ? 0.1f : staff.getFlySpeed() + 0.1f;
+                    staff.setFlySpeed(Math.min(0.3f, speed));
+                    messages.actionBar(staff, "staff.fly-speed", "speed", String.valueOf(Math.round(staff.getFlySpeed() * 10)));
+                } else if (staff.hasPotionEffect(PotionEffectType.NIGHT_VISION)) {
+                    staff.removePotionEffect(PotionEffectType.NIGHT_VISION);
+                    messages.actionBar(staff, "staff.night-vision-off");
+                } else {
+                    staff.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, PotionEffect.INFINITE_DURATION, 0, false, false));
+                    messages.actionBar(staff, "staff.night-vision-on");
                 }
             }
             case LEAVE -> toggle(staff);
             default -> {
             }
+        }
+    }
+
+    /** Suivre un joueur en spectateur (invisible, à travers ses yeux) ; s'accroupir en sort et rend le mode de jeu. */
+    private void spectate(Player staff, Player target) {
+        if (!staff.hasPermission(SPECTATE_PERMISSION)) {
+            messages.send(staff, "sanction.no-permission");
+            return;
+        }
+        spectating.putIfAbsent(staff.getUniqueId(), staff.getGameMode());
+        staff.setGameMode(GameMode.SPECTATOR);
+        staff.setSpectatorTarget(target);
+        staffLog.log(staff.getName(), StaffLog.Action.SPECTATE, target.getName());
+        messages.actionBar(staff, "staff.spectating", "player", target.getName());
+    }
+
+    /** Sortie du spectateur (s'accroupir, cible partie) : le mode de jeu d'avant, et le vol du mode staff. */
+    @EventHandler
+    public void onStopSpectating(PlayerStopSpectatingEntityEvent event) {
+        Player staff = event.getPlayer();
+        GameMode previous = spectating.remove(staff.getUniqueId());
+        if (previous != null) {
+            Bukkit.getScheduler().runTask(plugin, () -> restoreFromSpectator(staff, previous));
+        }
+    }
+
+    private void restoreFromSpectator(Player staff, GameMode previous) {
+        if (!staff.isOnline()) {
+            return;
+        }
+        staff.setGameMode(previous);
+        if (active.contains(staff.getUniqueId())) {
+            staff.setAllowFlight(true);
+            staff.setFlying(true);
         }
     }
 

@@ -15,13 +15,18 @@ import org.bukkit.inventory.Inventory;
 
 import java.util.List;
 
-/** /mod : chercher un joueur, les appels et les signalements à traiter, les dernières sanctions du réseau. */
+/**
+ * /mod : chercher un joueur, les bans définitifs à valider, les appels et les signalements à traiter, les statistiques
+ * du staff, les dernières sanctions du réseau.
+ */
 class StaffMenu implements Menu {
 
     private static final int SEARCH = 10;
     private static final int APPEALS = 12;
     private static final int REPORTS = 14;
     private static final int RECENT = 16;
+    private static final int PENDING = 11;
+    private static final int STATS = 15;
     private static final int CLOSE = 22;
 
     private final ModGui gui;
@@ -62,6 +67,11 @@ class StaffMenu implements Menu {
                 Sounds.page(player);
                 gui.openRecent(player);
             }
+            case PENDING -> {
+                Sounds.page(player);
+                gui.openPending(player);
+            }
+            case STATS -> gui.showStaffStats(player);
             case CLOSE -> player.closeInventory();
             default -> {
             }
@@ -88,6 +98,13 @@ class StaffMenu implements Menu {
         boolean history = viewer.hasPermission(ModGui.HISTORY);
         inventory.setItem(RECENT, Items.item(history ? Material.CLOCK : Material.GRAY_DYE, messages.get(viewer, "staff.recent.name"),
                 List.of(messages.get(viewer, history ? "staff.recent.lore" : "menu.locked"))));
+        boolean permanent = viewer.hasPermission(fr.eternom.eterModeration.module.sanction.SanctionService.PERMANENT_PERMISSION);
+        inventory.setItem(PENDING, Items.item(permanent ? Material.TNT : Material.GRAY_DYE,
+                messages.get(viewer, "staff.pending.name", "count", String.valueOf(counts.pending())),
+                List.of(messages.get(viewer, permanent ? "staff.pending.lore" : "menu.locked")), permanent && counts.pending() > 0));
+        boolean stats = viewer.hasPermission(ModGui.STAFF_STATS);
+        inventory.setItem(STATS, Items.item(stats ? Material.COMPARATOR : Material.GRAY_DYE, messages.get(viewer, "staff.stats.name"),
+                List.of(messages.get(viewer, stats ? "staff.stats.lore" : "menu.locked"))));
         inventory.setItem(CLOSE, Items.item(Material.BARRIER, messages.get(viewer, "menu.close"), List.of()));
     }
 }

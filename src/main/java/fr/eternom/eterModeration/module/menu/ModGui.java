@@ -16,6 +16,9 @@ import fr.eternom.eterModeration.module.record.Records;
 import fr.eternom.eterModeration.module.report.ReportService;
 import fr.eternom.eterModeration.module.staff.Freeze;
 import fr.eternom.eterModeration.module.staff.StaffMode;
+import fr.eternom.eterModeration.module.staff.StaffLog;
+import fr.eternom.eterModeration.module.alert.JoinWatch;
+import java.time.Duration;
 import fr.eternom.eterModeration.module.record.Records.ChatLine;
 import fr.eternom.eterModeration.module.sanction.Labels;
 import fr.eternom.eterModeration.module.sanction.Motives;
@@ -58,6 +61,10 @@ public class ModGui {
     static final String NOTES = "eter.mod.notes";
     static final String CHATLOG = "eter.mod.chatlog";
     static final String ALTS = "eter.mod.alts";
+    static final String INVSEE = "eter.mod.invsee";
+    static final String WATCH = "eter.mod.watch";
+    static final String BAN_ALTS = "eter.mod.ban.alts";
+    static final String STAFF_STATS = "eter.mod.staffstats";
     private static final int CHAT_LINES = 20;
     /** Les cases d'une liste (menus de 54) : 4 lignes de 7, dans le cadre. */
     static final List<Integer> LIST = IntStream.rangeClosed(1, 4)
@@ -65,12 +72,13 @@ public class ModGui {
     /** Cadre des menus du staff (vue admin) ; celui des joueurs est orange. */
     static final Material STAFF_FRAME = Material.RED_STAINED_GLASS_PANE;
 
-    /** Ce que montre la fiche d'un joueur. */
-    record Profile(Target target, Optional<NetworkPlayer> network, List<Sanction> active, Optional<String> clan) {
+    /** Ce que montre la fiche d'un joueur : aussi son gel en cours et sa surveillance (« staff;raison »). */
+    record Profile(Target target, Optional<NetworkPlayer> network, List<Sanction> active, Optional<String> clan,
+                   Optional<Freeze.Info> frozen, Optional<String> watch) {
     }
 
     /** Les compteurs du menu /mod. */
-    record Counts(int appeals, int reports) {
+    record Counts(int appeals, int reports, int pending) {
     }
 
     /** Un appel ouvert et la sanction visée. */
@@ -87,11 +95,18 @@ public class ModGui {
     private final Labels labels;
     private final ReportService reports;
     private final Freeze freeze;
+    private final StaffLog staffLog;
+    private final JoinWatch watch;
+    private final InventoryCompare compare;
 
     public ModGui(JavaPlugin plugin, SanctionService sanctions, AppealService appeals, Records records, Motives motives,
-                  PlayerDirectory players, Messages messages, Labels labels, ReportService reports, Freeze freeze) {
+                  PlayerDirectory players, Messages messages, Labels labels, ReportService reports, Freeze freeze,
+                  StaffLog staffLog, JoinWatch watch, InventoryCompare compare) {
         this.reports = reports;
         this.freeze = freeze;
+        this.staffLog = staffLog;
+        this.watch = watch;
+        this.compare = compare;
         this.plugin = plugin;
         this.sanctions = sanctions;
         this.appeals = appeals;
@@ -105,8 +120,146 @@ public class ModGui {
     // ---------- Staff ----------
 
     public void openStaff(Player staff) {
-        load(staff, () -> new Counts(appeals.repository().openAppeals().size(), reports.repository().countOpen()),
+        load(staff, () -> new Counts(appeals.repository().openAppeals().size(), reports.repository().countOpen(),
+                        sanctions.countPending()),
                 counts -> new StaffMenu(this, staff, counts).getInventory());
+    }
+
+    /** Les bans définitifs à valider (eter.mod.permanent). */
+    void openPending(Player staff) {
+        if (allowed(staff, SanctionService.PERMANENT_PERMISSION)) {
+            load(staff, sanctions::pendingBans, list -> new PendingMenu(this, staff, list).getInventory());
+        }
+    }
+
+    /** Statistiques du staff sur 30 jours (eter.mod.staffstats), dans le chat : sanctions, signalements, gels... */
+    void showStaffStats(Player staff) {
+        if (!allowed(staff, STAFF_STATS)) {
+            return;
+        }
+        staff.closeInventory();
+        long since = System.currentTimeMillis() - 30L * 86_400_000L;
+        Tasks.async(plugin, staff, () -> staffLog.stats(since), stats -> {
+            messages.send(staff, stats.isEmpty() ? "staff-stats.empty" : "staff-stats.header");
+            stats.forEach((name, actions) -> {
+                String detail = actions.entrySet().stream()
+                        .map(entry -> messages.plain(staff, "staff-action." + entry.getKey().name().toLowerCase(java.util.Locale.ROOT))
+                                + " " + entry.getValue())
+                        .collect(java.util.stream.Collectors.joining(", "));
+                messages.send(staff, "staff-stats.line", "staff", name, "detail", detail);
+            });
+        }, () -> messages.send(staff, "error.generic"));
+    }
+
+    /** Les preuves jointes (derniers messages du joueur), dans le chat du staff. */
+    void showEvidence(Player staff, String playerName, String evidence) {
+        if (evidence == null || evidence.isBlank()) {
+            messages.send(staff, "evidence.empty");
+            return;
+        }
+        messages.send(staff, "evidence.header", "player", playerName);
+        for (String line : evidence.split("\n")) {
+            messages.send(staff, "evidence.line", "line", line);
+        }
+    }
+
+    /** Son coffre de l'Ender, en lecture seule : en direct s'il est ici, sinon sa dernière sauvegarde (EterSync). */
+    void openEnderChest(Player staff, Target target) {
+        if (!allowed(staff, INVSEE)) {
+            return;
+        }
+        staffLog.log(staff.getName(), StaffLog.Action.INVSEE, target.name() + " (ender)");
+        Player local = Bukkit.getPlayer(target.uuid());
+        if (local != null) {
+            ReadOnlyView.open(staff, messages.get(staff, "view.ender", "player", target.name()), local.getEnderChest().getContents());
+            return;
+        }
+        Tasks.async(plugin, staff, () -> Integrations.lastEnderChest(target), contents -> contents.ifPresentOrElse(
+                items -> ReadOnlyView.open(staff, messages.get(staff, "view.ender", "player", target.name()), items),
+                () -> messages.send(staff, "view.none", "player", target.name())), () -> messages.send(staff, "error.generic"));
+    }
+
+    /** Son inventaire complet (armure et seconde main comprises), en lecture seule : en direct s'il est ici, sinon sauvegardé. */
+    void openFullInventory(Player staff, Target target) {
+        if (!allowed(staff, INVSEE)) {
+            return;
+        }
+        staffLog.log(staff.getName(), StaffLog.Action.INVSEE, target.name());
+        Player local = Bukkit.getPlayer(target.uuid());
+        if (local != null) {
+            ReadOnlyView.open(staff, messages.get(staff, "view.inventory", "player", target.name()), local.getInventory().getContents());
+            return;
+        }
+        Tasks.async(plugin, staff, () -> Integrations.lastInventory(target), contents -> contents.ifPresentOrElse(
+                items -> ReadOnlyView.open(staff, messages.get(staff, "view.inventory", "player", target.name()), items),
+                () -> messages.send(staff, "view.none", "player", target.name())), () -> messages.send(staff, "error.generic"));
+    }
+
+    /** Comparer son contenu avec celui de la veille (duplication), dans le chat. */
+    void compareInventory(Player staff, Target target) {
+        if (allowed(staff, INVSEE)) {
+            staff.closeInventory();
+            compare.compare(staff, target);
+        }
+    }
+
+    /** Le mettre sous surveillance (avec une raison) ou l'en retirer (eter.mod.watch). */
+    void toggleWatch(Player staff, Target target, boolean watched) {
+        if (!allowed(staff, WATCH)) {
+            return;
+        }
+        String staffName = staff.getName();
+        if (watched) {
+            Tasks.async(plugin, staff, () -> watch.toggle(target.uuid(), staffName, ""), now -> {
+                messages.send(staff, "watch.off", "player", target.name());
+                openPlayer(staff, target);
+            }, () -> messages.send(staff, "error.generic"));
+            return;
+        }
+        askText(staff, "watch", 100, reason -> Tasks.async(plugin, staff, () -> watch.toggle(target.uuid(), staffName, reason), now -> {
+            messages.send(staff, "watch.on", "player", target.name());
+            records.addNote(target.uuid(), staffName, messages.plain(staff, "watch.note", "reason", reason));
+            openPlayer(staff, target);
+        }, () -> messages.send(staff, "error.generic")), () -> openPlayer(staff, target), "player", target.name());
+    }
+
+    /** Changer la durée d'une sanction en cours (eter.mod.change) : la nouvelle durée totale, « perm » = définitive. */
+    void askChange(Player staff, Target target, Sanction sanction) {
+        askText(staff, "change", 8, text -> {
+            Duration duration = text.equalsIgnoreCase("perm") ? null : Motives.parseDuration(text.toLowerCase(java.util.Locale.ROOT));
+            if (duration == null && !text.equalsIgnoreCase("perm")) {
+                messages.send(staff, "sanction.bad-duration");
+                return;
+            }
+            sanctions.change(staff, sanction, duration, () -> openHistory(staff, target));
+        }, () -> openHistory(staff, target), "player", target.name(), "type", labels.type(staff, sanction.type()),
+                "id", String.valueOf(sanction.id()));
+    }
+
+    /**
+     * Étendre son ban aux comptes liés (eter.mod.ban.alts) : chacun reçoit un ban de même fin, motif « evasion » (ou
+     * libre), raison « compte lié à ... ».
+     */
+    void banAlts(Player staff, Target target, List<Records.Link> links) {
+        if (!allowed(staff, BAN_ALTS) || links.isEmpty()) {
+            return;
+        }
+        Tasks.async(plugin, staff, () -> repository().active(target.uuid(), System.currentTimeMillis()).stream()
+                .filter(sanction -> sanction.type() == fr.eternom.eterModeration.module.sanction.SanctionType.BAN).findFirst(), ban -> {
+            if (ban.isEmpty()) {
+                messages.send(staff, "alts.not-banned", "player", target.name());
+                return;
+            }
+            Duration duration = ban.get().isPermanent() ? null : Duration.ofMillis(ban.get().remainingMillis(System.currentTimeMillis()));
+            String reason = messages.plain(staff, "alts.ban-reason", "player", target.name());
+            confirm(staff, "ban-alts", () -> {
+                for (Records.Link link : links) {
+                    sanctions.giveFree(staff, new Target(link.player(), link.name()),
+                            fr.eternom.eterModeration.module.sanction.SanctionType.BAN, duration, reason, () -> { });
+                }
+                openAlts(staff, target);
+            }, () -> openAlts(staff, target), "player", target.name(), "count", String.valueOf(links.size()));
+        }, () -> messages.send(staff, "error.generic"));
     }
 
     /** /mod <joueur> : le dernier joueur vu sous ce nom, sur tout le réseau. */
@@ -118,7 +271,7 @@ public class ModGui {
 
     public void openPlayer(Player staff, Target target) {
         load(staff, () -> new Profile(target, players.get(target.uuid()), repository().active(target.uuid(), System.currentTimeMillis()),
-                        Integrations.clan(target)),
+                        Integrations.clan(target), freeze.info(target.uuid()), watch.watch(target.uuid())),
                 profile -> new PlayerMenu(this, staff, profile).getInventory());
     }
 
@@ -181,6 +334,7 @@ public class ModGui {
             return;
         }
         staff.closeInventory();
+        staffLog.log(staff.getName(), StaffLog.Action.TELEPORT, target.name());
         Tasks.async(plugin, staff, () -> players.getServer(target.uuid()), server -> server.ifPresentOrElse(
                 name -> EterLib.get().getTeleports().teleportNow(staff, Destination.toPlayer(target.uuid(), name, target.name())),
                 () -> messages.send(staff, "staff.offline", "player", target.name())), () -> messages.send(staff, "error.generic"));

@@ -8,24 +8,36 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/** /mod : le menu du staff ; /mod <joueur> : sa fiche. Tout le reste se fait dans les menus. */
+/**
+ * /mod : le menu du staff ; /mod <joueur> : sa fiche ; /mod reload : le barème et le filtre relus dans config.yml, sans
+ * redémarrage (eter.mod.reload ; le reste de la config demande toujours un redémarrage). Tout le reste se fait dans
+ * les menus.
+ */
 public class ModCommand implements TabExecutor {
+
+    public static final String RELOAD_PERMISSION = "eter.mod.reload";
 
     private final ModGui gui;
     private final OnlineNames names;
     private final Messages messages;
+    private final Runnable reload;
 
-    public ModCommand(ModGui gui, OnlineNames names, Messages messages) {
+    public ModCommand(ModGui gui, OnlineNames names, Messages messages, Runnable reload) {
         this.gui = gui;
         this.names = names;
         this.messages = messages;
+        this.reload = reload;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
+        if (args.length == 1 && args[0].equalsIgnoreCase("reload") && sender.hasPermission(RELOAD_PERMISSION)) {
+            reload.run();
+            messages.send(sender, "reload.done");
+        } else if (!(sender instanceof Player player)) {
             messages.send(sender, "command.players-only");
         } else if (args.length == 0) {
             gui.openStaff(player);
@@ -37,6 +49,13 @@ public class ModCommand implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        return args.length == 1 ? names.complete(args[0]) : List.of();
+        if (args.length != 1) {
+            return List.of();
+        }
+        List<String> completions = new ArrayList<>(names.complete(args[0]));
+        if (sender.hasPermission(RELOAD_PERMISSION) && "reload".startsWith(args[0].toLowerCase())) {
+            completions.add("reload");
+        }
+        return completions;
     }
 }

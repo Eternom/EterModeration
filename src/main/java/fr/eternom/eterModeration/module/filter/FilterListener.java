@@ -17,6 +17,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayDeque;
@@ -26,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Le filtre appliqué : message bloqué et le joueur prévenu. Un mot interdit (chat ou message privé) est sanctionné
@@ -46,6 +51,7 @@ public class FilterListener implements Listener {
     private final Set<String> privateCommands;
     private final String wordMotive;
     private final String spamMotive;
+    private final String advertMotive;
     private final int strikes;
     private final long strikesWindowMillis;
     private final String staffName;
@@ -62,6 +68,7 @@ public class FilterListener implements Listener {
         this.privateCommands = privateCommands;
         this.wordMotive = config == null ? "" : config.getString("word-motive", "");
         this.spamMotive = config == null ? "" : config.getString("spam-motive", "");
+        this.advertMotive = config == null ? "" : config.getString("adverts.motive", "");
         this.strikes = config == null ? 3 : Math.max(1, config.getInt("strikes", 3));
         this.strikesWindowMillis = (config == null ? 10 : config.getInt("strikes-minutes", 10)) * 60_000L;
         this.staffName = config == null ? "Filter" : config.getString("staff-name", "Filter");
@@ -88,10 +95,58 @@ public class FilterListener implements Listener {
         if (!privateCommands.contains(MuteGuard.command(event.getMessage())) || player.hasPermission(BYPASS)) {
             return;
         }
-        if (filter.check(player.getUniqueId(), event.getMessage()) == Verdict.WORD) {
+        Verdict verdict = filter.scan(event.getMessage());
+        if (verdict != Verdict.OK) {
             event.setCancelled(true);
-            blocked(player, Verdict.WORD, event.getMessage());
+            blocked(player, verdict, event.getMessage());
         }
+    }
+
+    /** Panneaux : mots interdits et pub (un panneau se lit par tout le monde, longtemps). */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onSign(SignChangeEvent event) {
+        String text = event.lines().stream().map(line -> PlainTextComponentSerializer.plainText().serialize(line))
+                .collect(Collectors.joining(" "));
+        if (written(event.getPlayer(), text)) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** Livres : chaque page, et le titre à la signature. */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onBook(PlayerEditBookEvent event) {
+        BookMeta book = event.getNewBookMeta();
+        StringBuilder text = new StringBuilder(book.getTitle() == null ? "" : book.getTitle());
+        book.pages().forEach(page -> text.append(' ').append(PlainTextComponentSerializer.plainText().serialize(page)));
+        if (written(event.getPlayer(), text.toString())) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** Enclume : le nouveau nom de l'objet (sans résultat, rien à prendre). */
+    @EventHandler(priority = EventPriority.LOW)
+    public void onAnvil(PrepareAnvilEvent event) {
+        String name = event.getView().getRenameText();
+        if (event.getResult() == null || name == null || name.isBlank() || !(event.getView().getPlayer() instanceof Player player)
+                || player.hasPermission(BYPASS)) {
+            return;
+        }
+        if (filter.scan(name) != Verdict.OK) {
+            event.setResult(null);
+        }
+    }
+
+    /** Un texte écrit ailleurs que dans le chat : true s'il est bloqué (prévenu et sanctionné comme dans le chat). */
+    private boolean written(Player player, String text) {
+        if (text.isBlank() || player.hasPermission(BYPASS)) {
+            return false;
+        }
+        Verdict verdict = filter.scan(text);
+        if (verdict == Verdict.OK) {
+            return false;
+        }
+        blocked(player, verdict, text);
+        return true;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -109,6 +164,9 @@ public class FilterListener implements Listener {
         if (verdict == Verdict.WORD) {
             alerts.alert("alert.filter", "player", player.getName(), "message", message);
             punish(player, wordMotive, message);
+        } else if (verdict == Verdict.ADVERT) {
+            alerts.alert("alert.filter-advert", "player", player.getName(), "message", message);
+            punish(player, advertMotive, message);
         } else if (strike(player.getUniqueId())) {
             punish(player, spamMotive, message);
         }

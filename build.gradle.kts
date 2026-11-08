@@ -30,7 +30,17 @@ dependencies {
     // Fiche du joueur : homes (API d'EterHome)
     compileOnly("com.github.Eternom:EterHome:1.2.1")
     // Fiche du joueur : inventaire (API d'EterSync)
-    compileOnly("com.github.Eternom:EterSync:1.1.0")
+    compileOnly("com.github.Eternom:EterSync:1.2.3")
+
+    // Tests : le barème et le filtre (gradlew test)
+    testImplementation("io.papermc.paper:paper-api:26.2.build.129-stable")
+    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 java {

@@ -37,7 +37,11 @@ class PlayerMenu implements Menu {
     private static final int CHAT = 32;
     private static final int ALTS = 33;
     private static final int FREEZE = 34;
+    private static final int WATCH = 37;
+    private static final int ENDER = 38;
     private static final int HOMES = 39;
+    private static final int FULL_INVENTORY = 40;
+    private static final int COMPARE = 42;
     private static final int INVENTORY = 41;
     private static final int BACK = 49;
 
@@ -80,6 +84,10 @@ class PlayerMenu implements Menu {
             case GOTO -> gui.goTo(player, target);
             case HOMES -> Integrations.openHomes(player, target);
             case INVENTORY -> Integrations.openInventory(player, target);
+            case FULL_INVENTORY -> gui.openFullInventory(player, target);
+            case ENDER -> gui.openEnderChest(player, target);
+            case COMPARE -> gui.compareInventory(player, target);
+            case WATCH -> gui.toggleWatch(player, target, profile.watch().isPresent());
             case FREEZE -> {
                 if (online()) {
                     gui.freeze().toggle(player, target);
@@ -112,6 +120,12 @@ class PlayerMenu implements Menu {
             lore.add(messages.get(viewer, "player.first-seen", "date", Labels.date(network.firstSeen())));
         }, () -> lore.add(messages.get(viewer, "player.never-seen")));
         profile.clan().ifPresent(clan -> lore.add(messages.get(viewer, "player.clan", "clan", clan)));
+        profile.frozen().ifPresent(info -> lore.add(messages.get(viewer, "player.frozen", "staff", info.staffName(),
+                "time", labels.time(viewer, now - info.since()))));
+        profile.watch().ifPresent(value -> {
+            String[] parts = value.split(";", 2);
+            lore.add(messages.get(viewer, "player.watched", "staff", parts[0], "reason", parts.length > 1 ? parts[1] : ""));
+        });
         if (profile.active().isEmpty()) {
             lore.add(messages.get(viewer, "player.clean"));
         }
@@ -134,6 +148,11 @@ class PlayerMenu implements Menu {
             inventory.setItem(INVENTORY, Items.item(Material.CHEST, messages.get(viewer, "player.inventory.name"),
                     List.of(messages.get(viewer, "player.inventory.lore"))));
         }
+        inventory.setItem(WATCH, button(profile.watch().isPresent() ? Material.ENDER_EYE : Material.SPYGLASS,
+                profile.watch().isPresent() ? "player.unwatch" : "player.watch", ModGui.WATCH));
+        inventory.setItem(ENDER, button(Material.ENDER_CHEST, "player.ender", ModGui.INVSEE));
+        inventory.setItem(FULL_INVENTORY, button(Material.IRON_CHESTPLATE, "player.full-inventory", ModGui.INVSEE));
+        inventory.setItem(COMPARE, button(Material.HOPPER, "player.compare", ModGui.INVSEE));
         if (online()) {
             inventory.setItem(GOTO, button(Material.ENDER_PEARL, "player.goto", StaffMode.PERMISSION));
             inventory.setItem(FREEZE, button(Material.PACKED_ICE, "player.freeze", Freeze.PERMISSION));

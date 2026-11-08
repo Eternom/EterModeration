@@ -22,7 +22,8 @@ import java.util.Map;
 
 /**
  * Les signalements ouverts, le plus récent d'abord (28 au plus) : le joueur signalé, le motif, le détail, l'auteur.
- * Clic gauche : aller le voir ; clic droit : traité (l'auteur est prévenu) ; shift : sa fiche.
+ * Clic gauche : aller le voir ; clic droit : traité, fondé (l'auteur est prévenu) ; shift + droit : faux signalement ;
+ * shift + gauche : sa fiche ; touche Jeter (Q) : le prendre en charge ; touche 1-9 : les preuves jointes dans le chat.
  */
 class ReportsMenu implements Menu {
 
@@ -49,12 +50,21 @@ class ReportsMenu implements Menu {
         Report report = reportAt.get(slot);
         if (report != null) {
             Target target = new Target(report.target(), report.targetName());
-            if (click.isShiftClick()) {
+            if (click == ClickType.DROP || click == ClickType.CONTROL_DROP) {
+                Sounds.click(player);
+                gui.reports().claim(player, report, () -> gui.openReports(player));
+            } else if (click == ClickType.NUMBER_KEY) {
+                player.closeInventory();
+                gui.showEvidence(player, report.targetName(), report.evidence());
+            } else if (click == ClickType.SHIFT_RIGHT) {
+                Sounds.click(player);
+                gui.reports().close(player, report, true, () -> gui.openReports(player));
+            } else if (click.isShiftClick()) {
                 Sounds.page(player);
                 gui.openPlayer(player, target);
             } else if (click.isRightClick()) {
                 Sounds.click(player);
-                gui.reports().close(player, report, () -> gui.openReports(player));
+                gui.reports().close(player, report, false, () -> gui.openReports(player));
             } else {
                 gui.goTo(player, target);
             }
@@ -82,6 +92,12 @@ class ReportsMenu implements Menu {
             }
             lore.add(messages.get(viewer, "reports.by", "player", report.reporterName(), "date", Labels.date(report.createdAt()),
                     "server", report.server()));
+            if (report.claimedBy() != null) {
+                lore.add(messages.get(viewer, "reports.claimed", "staff", report.claimedBy()));
+            }
+            if (!report.evidence().isBlank()) {
+                lore.add(messages.get(viewer, "reports.evidence"));
+            }
             lore.add(messages.get(viewer, "reports.click"));
             inventory.setItem(slot, Items.head(Bukkit.createProfile(report.target(), report.targetName()),
                     messages.get(viewer, "reports.name", "player", report.targetName()), lore));

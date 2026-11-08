@@ -9,13 +9,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
 /**
- * Un joueur muet ne parle plus : ni chat, ni messages privés (les commandes de mute.blocked-commands). Bloqué au
+ * Un joueur muet ne parle plus : ni chat, ni messages privés (les commandes de private-commands), ni panneaux, livres
+ * ou noms à l'enclume. Bloqué au
  * plus tôt (LOWEST), avant EterChat et le filtre.
  */
 public class MuteGuard implements Listener {
@@ -43,6 +48,32 @@ public class MuteGuard implements Listener {
     public void onCommand(PlayerCommandPreprocessEvent event) {
         if (blockedCommands.contains(command(event.getMessage())) && muted(event.getPlayer())) {
             event.setCancelled(true);
+        }
+    }
+
+    /** Un joueur muet n'écrit pas non plus ailleurs : panneaux, livres, noms à l'enclume. */
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onSign(SignChangeEvent event) {
+        boolean written = event.lines().stream()
+                .anyMatch(line -> !PlainTextComponentSerializer.plainText().serialize(line).isBlank());
+        if (written && muted(event.getPlayer())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onBook(PlayerEditBookEvent event) {
+        if (muted(event.getPlayer())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onAnvil(PrepareAnvilEvent event) {
+        String name = event.getView().getRenameText();
+        if (event.getResult() != null && name != null && !name.isBlank() && event.getView().getPlayer() instanceof Player player
+                && enforcement.mute(player.getUniqueId()).isPresent()) {
+            event.setResult(null);
         }
     }
 

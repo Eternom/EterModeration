@@ -5,6 +5,7 @@
 
 # Sanction types and the scale's motives (config.yml > motives: one name per motive).
 type:
+  kick: "Kick"
   warn: "Warning"
   mute: "Mute"
   ban: "Ban"
@@ -22,10 +23,16 @@ motive:
   # Old motive (jail removed): history only
   escape: "Escape (old motive)"
   evasion: "Sanction evasion"
+  freeze-logout: "Logged out while frozen"
 length:
   permanent: "permanent"
 
 sanction:
+  protected: "<error><accent><player></accent> is a staff member: only a supervisor can sanction them."
+  approval-requested: "<info>Permanent ban requested: it is a <accent><time></accent> ban until another staff member approves it (<accent>/mod</accent>)."
+  approval-self: "<error>Another staff member must approve your own permanent ban."
+  approval-done: "<error>This request has already been handled."
+  changed: "<success>✔</success> <info>Sanction of <accent><player></accent>: new length <accent><time></accent>."
   no-permission: "<error>You don't have permission for this action."
   reason-required: "<error>A free sanction needs a reason."
   bad-duration: "<error>Unreadable duration: <accent>30m</accent>, <accent>2h</accent>, <accent>3d</accent>, <accent>2w</accent> or <accent>perm</accent>."
@@ -44,6 +51,8 @@ sanction:
   status-lifted: "<success>●</success> <info>Lifted by <accent><staff>"
 
 notify:
+  kick: "<error>You are kicked from the network</error> <info>(<accent><motive></accent>). <reason>"
+  changed: "<info>The length of your sanction (<type>) changed: <accent><time></accent>. <dark_gray>Your sanctions: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
   report-closed: "<info>Your report against <accent><player></accent> was handled by the staff. Thanks!"
   warn: "<error>Warning</error> <info>for <accent><motive></accent>. <reason> <dark_gray>The next one will be heavier. Your sanctions: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
   mute: "<error>You are muted for <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>No chat, no private messages. Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
@@ -56,6 +65,7 @@ mute:
   blocked: "<error>You are muted for <accent><time></accent> more (<motive>).</error> <dark_gray>Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
 
 filter:
+  advert: "<error>No advertising: server and website addresses are not allowed."
   spam: "<error>Slow down: too many messages at once."
   repeat: "<error>No need to repeat the same message."
   caps: "<error>Fewer capital letters, please."
@@ -70,6 +80,16 @@ appeal:
   answered-refused: "<success>✔</success> <info>Appeal of <accent><player></accent> refused."
 
 alert:
+  approval-needed: "<accent><staff></accent> <info>requests a permanent ban of <accent><player></accent> <dark_gray>(#<id>)</dark_gray>: approve it in <click:run_command:'/mod'><accent>/mod</accent></click>"
+  approved: "<accent><staff></accent> <info>approved the permanent ban of <accent><player></accent> requested by <accent><requester></accent> <dark_gray>(#<id>)"
+  refused: "<accent><staff></accent> <info>refused the permanent ban of <accent><player></accent> requested by <accent><requester></accent> <dark_gray>(#<id>, the temporary ban stays)"
+  changed: "<accent><staff></accent> <info>changed the length of <accent><player></accent>'s sanction (<type>): <accent><time>"
+  freeze-expired: "<info>The freeze of <accent><player></accent> (by <accent><staff></accent>) ended on its own after <accent><minutes></accent> min."
+  frozen-chat: "<error>[Frozen]</error> <accent><player></accent> <dark_gray>»</dark_gray> <white><message>"
+  filter-advert: "<accent><player></accent> <info>wrote an advert: <dark_gray><message>"
+  xray: "<error>Suspicious mining</error><info>: <accent><player></accent> found <accent><veins></accent> rare veins for <accent><stone></accent> stone blocks in less than an hour. <dark_gray>To check (inspector, spectator)."
+  watch-join: "<info>Watched player joined: <accent><player></accent> <dark_gray>(by <staff>: <reason>)"
+  alt-of-banned: "<error>Account linked to a banned player</error><info>: <accent><player></accent> shares a connection with <accent><alts></accent>. <dark_gray>Possible ban evasion."
   prefix: "<error>[Mod]</error> "
   report: "<info><accent><player></accent> reports <accent><target></accent>: <reason> <dark_gray><text></dark_gray> <click:run_command:'/mod'><accent>/mod</accent></click>"
   frozen: "<accent><staff></accent> <info>froze <accent><player>"
@@ -96,6 +116,16 @@ menu:
   back-to-player: "<accent>« <player>'s profile"
 
 staff:
+  pending:
+    name: "<accent>Permanent bans to approve <dark_gray>(<count>)"
+    lore: "<dark_gray>▸ <info>Requested by another staff member"
+  stats:
+    name: "<accent>Staff statistics"
+    lore: "<dark_gray>▸ <info>Last 30 days, in the chat"
+  fly-speed: "<info>Fly speed: <accent><speed>"
+  night-vision-on: "<success>Night vision"
+  night-vision-off: "<info>Night vision off"
+  spectating: "<info>You are following <accent><player></accent> <dark_gray>· sneak to leave"
   title: "<primary>Moderation"
   not-here: "<error>No staff mode on this server (use a regular server)."
   "on": "<success>Staff mode on.</success> <info>You are <accent>invisible</accent>, your inventory is put aside. <accent>/staff</accent> to leave."
@@ -118,6 +148,23 @@ staff:
     lore: "<dark_gray>▸ <info>Across the network"
 
 player:
+  frozen: "<error>❄ Frozen</error> <info>by <accent><staff></accent> for <accent><time>"
+  watched: "<error>Watched</error> <info>by <accent><staff></accent>: <reason>"
+  watch:
+    name: "<accent>Watch"
+    lore: "<dark_gray>▸ <info>The staff is told each time they join"
+  unwatch:
+    name: "<accent>Stop watching"
+    lore: "<dark_gray>▸ <info>They are watched right now"
+  ender:
+    name: "<accent>Ender chest"
+    lore: "<dark_gray>▸ <info>Read only"
+  full-inventory:
+    name: "<accent>Full inventory"
+    lore: "<dark_gray>▸ <info>Armor and offhand included, read only"
+  compare:
+    name: "<accent>Compare with yesterday"
+    lore: "<dark_gray>▸ <info>What changed the most (duplication?)"
   title: "<primary><player>'s profile"
   name: "<accent><player>"
   online: "<success>●</success> <info>Online on <accent><server>"
@@ -166,6 +213,8 @@ motives:
     lore: "<dark_gray>▸ <info>Outside the scale: any length and reason"
 
 history:
+  evidence: "<dark_gray>▸ <info>Evidence attached <dark_gray>(key 1-9)"
+  click-change: "<dark_gray>▸ <info>Right click: change the length"
   title: "<primary><player>'s history <dark_gray>(<count>)"
   click-lift: "<dark_gray>▸ <info>Click: lift the sanction"
   empty: "<success>No sanction"
@@ -180,6 +229,11 @@ notes:
     lore: "<dark_gray>▸ <info>Staff only"
 
 alts:
+  not-banned: "<error><accent><player></accent> is not banned right now."
+  ban-reason: "Account linked to <player> (ban evasion)"
+  ban:
+    name: "<error>Extend their ban to linked accounts"
+    lore: "<dark_gray>▸ <info>Same end as their ban"
   title: "<primary>Accounts linked to <player>"
   name: "<accent><player>"
   last-seen: "<dark_gray>▸ <info>Last seen <accent><date>"
@@ -209,6 +263,16 @@ my:
   empty: "<success>No active sanction"
 
 dialogs:
+  watch:
+    title: "<primary>Watch <player>"
+    body: "<info>The staff will be told each time they join the network. Why?"
+    label: "Reason"
+    button: "Watch"
+  change:
+    title: "<primary>Sanction length"
+    body: "<info><type> #<id> of <accent><player></accent>: its new total length, from when it was given (30m, 2h, 3d, 2w or perm)."
+    label: "Length"
+    button: "Change"
   report-who:
     title: "<primary>Report a player"
     body: "<info>Their name. A false report can be sanctioned."
@@ -257,6 +321,18 @@ dialogs:
     button: "Send"
 
 confirm:
+  approve:
+    title: "<primary>Approve the permanent ban"
+    body: "<info>Ban of <accent><player></accent> (#<id>), requested by <accent><staff></accent>: it becomes permanent."
+    button: "Approve"
+  refuse:
+    title: "<primary>Refuse the permanent ban"
+    body: "<info>Ban of <accent><player></accent> (#<id>), requested by <accent><staff></accent>: it stays temporary."
+    button: "Refuse"
+  ban-alts:
+    title: "<primary>Ban linked accounts"
+    body: "<info>The <accent><count></accent> accounts linked to <accent><player></accent> get a ban with the same end. A hint, not a proof: check first."
+    button: "Ban"
   lift:
     title: "<primary>Lift sanction #<id>"
     body: "<info><accent><type></accent> of <accent><player></accent>: it ends now and no longer counts for repeat offences."
@@ -267,6 +343,12 @@ confirm:
     button: "Delete"
 
 freeze:
+  title: "<error><bold>FROZEN"
+  subtitle: "<info>Don't log out: the staff will talk to you"
+  chat-sent: "<dark_gray>[To staff]</dark_gray> <white><message>"
+  note-frozen: "Frozen"
+  note-unfrozen: "Unfrozen"
+  quit-reason: "Logged out while frozen"
   bar: "<error>You are frozen</error> <dark_gray>· <info>don't log out, a staff member will talk to you"
   frozen: "<error>You are frozen by the staff.</error> <info>Don't log out: a staff member will talk to you in private messages."
   unfrozen: "<success>You are no longer frozen.</success>"
@@ -276,6 +358,14 @@ freeze:
   exempt: "<error><accent><player></accent> is a staff member: they can't be frozen."
 
 block-log:
+  area-header: "<info>Around <accent><x> <y> <z></accent> <dark_gray>(radius <radius>)</dark_gray>:"
+  at: "<dark_gray><where> "
+  poured: "<dark_gray>▸ <accent><block></accent> <error>poured</error> <info>by <accent><player></accent> <dark_gray>(<ago>)"
+  fire: "<dark_gray>▸ <error>Fire</error> <info>lit by <accent><player></accent> <dark_gray>(<ago>)"
+  tnt: "<dark_gray>▸ <error>TNT</error> <info>lit by <accent><player></accent> <dark_gray>(<ago>)"
+  sign: "<dark_gray>▸ <info>Sign written by <accent><player></accent> <dark_gray>(<ago>)</dark_gray>: <white><text>"
+  killed: "<dark_gray>▸ <accent><block></accent> <error>killed</error> <info>by <accent><player></accent> <dark_gray>(<ago>)"
+  hanging: "<dark_gray>▸ <accent><block></accent> <error>broken</error> <info>by <accent><player></accent> <dark_gray>(<ago>)"
   header: "<info>Block <accent><x> <y> <z></accent>:"
   empty: "<dark_gray>▸ <info>Nothing logged in the last <accent><days></accent> days (natural block, or older)."
   placed: "<dark_gray>▸ <accent><block></accent> <info>placed by <accent><player></accent> <dark_gray>(<ago>)"
@@ -285,9 +375,15 @@ block-log:
   ago-days: "<amount> d ago"
 
 staff-tool:
+  chest:
+    name: "<accent>Container lens"
+    lore: "<dark_gray>▸ <info>Right-click: the contents, without touching · sneaking: who took or put what"
+  options:
+    name: "<accent>Options"
+    lore: "<dark_gray>▸ <info>Right-click: night vision · sneaking: fly speed"
   profile:
     name: "<accent>Player profile"
-    lore: "<dark_gray>▸ <info>Right click a player"
+    lore: "<dark_gray>▸ <info>Right-click a player: their profile · sneaking: follow them as a spectator"
   freeze:
     name: "<accent>Freeze / unfreeze"
     lore: "<dark_gray>▸ <info>Right click a player"
@@ -296,7 +392,7 @@ staff-tool:
     lore: "<dark_gray>▸ <info>Right click: teleported next to a player of the network"
   inspect:
     name: "<accent>Inspector"
-    lore: "<dark_gray>▸ <info>Right-click a block: who placed or broke it"
+    lore: "<dark_gray>▸ <info>Right-click a block: who placed or broke it · sneaking: everything that happened around"
   vanish:
     name: "<accent>Visible / invisible"
     lore: "<dark_gray>▸ <info>Right click"
@@ -308,6 +404,11 @@ staff-tool:
     lore: "<dark_gray>▸ <info>Right click: your inventory is given back"
 
 report:
+  blocked: "<error>Too many of your reports were false: you can't report for now."
+  claimed-by: "<error>Already handled by <accent><staff></accent>."
+  claimed: "<success>✔</success> <info>You are handling the report against <accent><player></accent>."
+  unclaimed: "<info>You are no longer handling the report against <accent><player></accent>."
+  closed-false: "<success>✔</success> <info>Report against <accent><player></accent> closed as false."
   title: "<primary>Report <player>"
   head: "<accent><player>"
   head-lore: "<dark_gray>▸ <info>Pick the reason"
@@ -328,10 +429,84 @@ report-reason:
   other: "Other"
 
 reports:
+  claimed: "<dark_gray>▸ <info>Handled by <accent><staff>"
+  evidence: "<dark_gray>▸ <info>Evidence attached <dark_gray>(key 1-9)"
   title: "<primary>Reports <dark_gray>(<count>)"
   name: "<accent><player>"
   reason: "<dark_gray>▸ <info>Reason: <accent><reason>"
   details: "<dark_gray>▸ <info>“<text>”"
   by: "<dark_gray>▸ <info>By <accent><player></accent> on <accent><date></accent> <dark_gray>(<server>)"
-  click: "<dark_gray>▸ <info>Left click: go to them · right click: handled · shift: profile"
+  click: "<dark_gray>▸ <info>Left: go to them · right: valid · shift right: false · shift left: profile · Q: take it · 1-9: evidence"
   empty: "<success>No report"
+
+# What the player sees when joining
+notice:
+  returning: "<info>Welcome back. Your ban is over: read the rules on the website again so it doesn't happen again."
+  warn:
+    title: "<error>Warning"
+    body: "<info>You received a warning for <accent><motive></accent>. <reason><newline><newline>The next one will be heavier. Your sanctions: <accent>/appeal</accent>"
+    accept: "I understand"
+    later: "Later"
+
+# Container log (staff mode lens, sneaking)
+container-log:
+  header: "<info>Container <accent><x> <y> <z></accent>:"
+  empty: "<dark_gray>▸ <info>Nothing taken or put in the last <accent><days></accent> days."
+  line: "<dark_gray>▸ <accent><player></accent> <changes> <dark_gray>(<ago>)"
+
+# Read-only copies
+chest-view:
+  title: "<primary>Container <dark_gray>(<x> <y> <z>) · read only"
+view:
+  ender: "<primary><player>'s ender chest <dark_gray>· read only"
+  inventory: "<primary><player>'s inventory <dark_gray>· read only"
+  none: "<error>No save for <accent><player></accent>."
+
+# Compare the inventory with yesterday
+compare:
+  none: "<error>No snapshot at least one day old for <accent><player></accent> yet."
+  header: "<info>Contents of <accent><player></accent> compared to <accent><days></accent> d ago:"
+  same: "<dark_gray>▸ <info>Nothing changed."
+  more: "<dark_gray>▸ <success>+<amount></success> <item>"
+  less: "<dark_gray>▸ <error>-<amount></error> <item>"
+
+# Watch list (player profile)
+watch:
+  on: "<success>✔</success> <info><accent><player></accent> is now watched."
+  off: "<success>✔</success> <info><accent><player></accent> is no longer watched."
+  note: "Watched: <reason>"
+
+# Evidence (sanctions, reports)
+evidence:
+  empty: "<error>No evidence attached."
+  header: "<info>Evidence <dark_gray>(<player>)</dark_gray>:"
+  line: "<dark_gray>▸ <white><line>"
+
+# Permanent bans to approve
+pending:
+  title: "<primary>Bans to approve <dark_gray>(<count>)"
+  requested: "<dark_gray>▸ <info>Requested by <accent><staff></accent> on <accent><date>"
+  click: "<dark_gray>▸ <info>Left click: approve · right: refuse · 1-9: evidence"
+  empty: "<success>No ban to approve."
+
+# Staff statistics (30 days)
+staff-stats:
+  header: "<info>The staff, last 30 days:"
+  empty: "<info>No staff action in the last 30 days."
+  line: "<dark_gray>▸ <accent><staff></accent> <dark_gray>: <info><detail>"
+staff-action:
+  sanction: "sanctions"
+  lift: "lifted"
+  change: "lengths changed"
+  freeze: "freezes"
+  unfreeze: "unfreezes"
+  invsee: "inventories seen"
+  chest: "containers seen"
+  teleport: "teleports"
+  staff_mode: "staff mode"
+  spectate: "spectating"
+  report: "reports handled"
+  appeal: "appeals handled"
+
+reload:
+  done: "<success>✔</success> <info>Motives and filter reloaded (config.yml)."

@@ -25,6 +25,7 @@ import java.util.Map;
 class AltsMenu implements Menu {
 
     private static final int BACK = 49;
+    private static final int BAN_ALTS = 51;
 
     private final ModGui gui;
     private final Messages messages;
@@ -50,6 +51,8 @@ class AltsMenu implements Menu {
         if (link != null) {
             Sounds.page(player);
             gui.openPlayer(player, new Target(link.player(), link.name()));
+        } else if (slot == BAN_ALTS && !links.isEmpty()) {
+            gui.banAlts(player, target, links);
         } else if (slot == BACK) {
             Sounds.page(player);
             gui.openPlayer(player, target);
@@ -76,6 +79,11 @@ class AltsMenu implements Menu {
             inventory.setItem(22, Items.item(Material.LIME_DYE, messages.get(viewer, "alts.empty"), List.of()));
         }
         inventory.setItem(47, Items.item(Material.BOOK, messages.get(viewer, "alts.info.name"), List.of(messages.get(viewer, "alts.info.lore"))));
+        if (!links.isEmpty()) {
+            boolean can = viewer.hasPermission(ModGui.BAN_ALTS);
+            inventory.setItem(BAN_ALTS, Items.item(can ? Material.TNT : Material.GRAY_DYE, messages.get(viewer, "alts.ban.name"),
+                    List.of(messages.get(viewer, can ? "alts.ban.lore" : "menu.locked"))));
+        }
         inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-player", "player", target.name()), List.of()));
     }
 }

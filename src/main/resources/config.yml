@@ -48,6 +48,37 @@ motives:
   evasion:
     icon: PLAYER_HEAD
     steps: [ban perm]
+  # Se déconnecter pendant un gel (vérification de triche refusée) : donnée automatiquement (freeze.quit-motive).
+  freeze-logout:
+    icon: PACKED_ICE
+    steps: [ban 7d, ban 30d, ban perm]
+
+# Récidive : une sanction plus vieille que ce nombre de mois ne compte plus (un vieux casier s'efface). 0 = toujours.
+recidivism-months: 6
+
+# Preuves : pour ces motifs (barème ou filtre), les derniers messages du joueur sont joints à la sanction (fiche >
+# historique, touche 1-9).
+evidence:
+  motives: [spam, insult, threat, advertising]
+  lines: 10
+
+# Un ban définitif n'est définitif qu'une fois validé par un second membre du staff (eter.mod.permanent, /mod > Bans à
+# valider) ; d'ici là, c'est un ban de « interim ». false = définitif tout de suite.
+permanent-approval:
+  enabled: true
+  interim: 7d
+
+# Le gel (freeze).
+freeze:
+  # Un gel prend fin seul au bout de ce nombre de minutes (un oubli du staff ne bloque pas un joueur). 0 = jamais.
+  max-minutes: 30
+  # Le staff qui gèle est téléporté près du joueur (même sur un autre serveur).
+  teleport-staff: true
+  # Quitter le réseau pendant un gel : cette sanction du barème (vide = seulement une alerte au staff), après
+  # quit-grace-seconds (un changement de serveur ou une petite coupure ne compte pas).
+  quit-motive: freeze-logout
+  quit-grace-seconds: 15
+
 
 # Commandes de messages privés : bloquées pour un joueur muet, filtrées (mots interdits) et gardées dans le journal.
 private-commands: [msg, tell, w, m, whisper, pm, r, reply]
@@ -81,11 +112,36 @@ filter:
   strikes-minutes: 10
   # Auteur des sanctions du filtre dans l'historique.
   staff-name: Filter
+  # Publicité : une adresse IP ou un nom de domaine (play.serveur.net, serveur.fr...) dans le chat, un message privé, un
+  # panneau, un livre ou un nom d'objet. Les adresses de « allowed » sont permises. motive : la sanction (vide = bloqué).
+  # Les mots espacés (« c o n n a r d ») sont aussi reconnus.
+  adverts:
+    enabled: true
+    allowed: [etercraft.fr, discord.gg/eternom]
+    motive: advertising
+
+# Minage suspect (anti x-ray) : alerte au staff quand un joueur trouve au moins min-veins filons rares (diamant, débris
+# antiques) en une heure, à plus de max-ratio filons pour 100 blocs de pierre cassés. Une alerte, jamais une sanction.
+xray:
+  enabled: true
+  min-veins: 6
+  max-ratio: 3.0
+
+# Alertes du staff aussi sur un salon Discord : l'adresse d'un webhook (Paramètres du salon > Intégrations > Webhooks).
+# Vide = pas de Discord. alerts : lesquelles (clés de lang/ > alert, sans « alert. ») ; vide = toutes.
+# Ne mets jamais cette adresse ailleurs que dans ce fichier : elle permet d'écrire sur le salon.
+discord:
+  webhook-url: ''
+  alerts: [given, lifted, changed, report, appeal, approval-needed, approved, refused, frozen-quit, xray, alt-of-banned, watch-join, filter-advert]
 
 # Signalements (/report) : les motifs proposés (nom affiché : lang/ > report-reason.<motif>) et leur icône.
 reports:
   # Un signalement par joueur toutes les ... secondes (sur tout le réseau).
   cooldown-seconds: 60
+  # Au-delà de ce nombre de signalements classés « faux » en 30 jours, le joueur ne peut plus signaler. 0 = jamais bloqué.
+  false-limit: 3
+  # Pour ces motifs, les derniers messages du joueur signalé sont joints au signalement.
+  evidence-reasons: [insult, spam]
   reasons:
     cheat: DIAMOND_SWORD
     insult: BLAZE_POWDER
@@ -100,10 +156,14 @@ reports:
 staff:
   blocked-servers: []
 
-# Journal des blocs (outil Inspecteur du mode staff : qui a posé ou cassé un bloc) : gardé ce nombre de jours, dans Redis
+# Journal des blocs et des coffres (outils Inspecteur et Loupe du mode staff) : gardé ce nombre de jours, dans Redis
 # seulement (une clé par chunk et par jour, qui expire d'elle-même). 0 = désactivé.
 block-log:
   days: 7
+
+# Le journal des actions du staff (statistiques, contrôle) : gardé ce nombre de jours.
+staff-log:
+  days: 90
 
 # Bouton Retour des menus des joueurs (/appel, /report) : la commande lancée ("menu social" : le sous-menu Social de
 # /menu), vide pour le menu central, "close" pour fermer.
