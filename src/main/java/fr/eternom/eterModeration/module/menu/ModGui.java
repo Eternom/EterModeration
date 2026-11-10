@@ -50,7 +50,7 @@ import java.util.stream.IntStream;
 
 /**
  * Toute l'interface de modération. Staff : /mod (appels, dernières sanctions, chercher un joueur), /mod <joueur>
- * (sa fiche : sanctionner, historique, notes, chat, comptes liés). Joueur : /appel (ses sanctions, faire appel).
+ * (sa fiche : sanctionner, historique, notes, chat, comptes liés). Joueur : /appeal (ses sanctions, faire appel).
  * Chaque menu charge ses données en tâche de fond, puis s'ouvre ; les saisies et confirmations passent par des
  * fenêtres (Dialogs), Annuler rouvre le menu d'où l'on vient. Chaque bouton vérifie sa permission.
  */
@@ -377,7 +377,7 @@ public class ModGui {
 
     // ---------- Joueur ----------
 
-    /** /appel : ses sanctions (en cours, et les avertissements) et ses appels. */
+    /** /appeal : ses sanctions (en cours, et les avertissements) et ses appels. */
     public void openMyAppeals(Player player) {
         load(player, () -> new MyAppealsMenu.Data(repository().history(player.getUniqueId()),
                         appeals.repository().ofPlayer(player.getUniqueId())),
@@ -494,7 +494,7 @@ public class ModGui {
         return messages;
     }
 
-    /** Retour des menus des joueurs (/appel, /report) : config.yml > menus.back-command (vide : menu central). */
+    /** Retour des menus des joueurs (/appeal, /report) : config.yml > menus.back-command (vide : menu central). */
     BackButton back() {
         return EterLib.get().backButton(plugin.getConfig().getString("menus.back-command", "menu social"));
     }

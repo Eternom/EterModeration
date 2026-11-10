@@ -77,7 +77,7 @@ Tout se fait dans les menus ; saisies et confirmations par des fenêtres (Dialog
 - **Signalements** (`/mod`) : gauche, aller le voir ; droit, fondé (l'auteur est prévenu) ; shift + droit, **faux**
   (au-delà de `reports.false-limit` faux en 30 jours, l'auteur ne peut plus signaler) ; Q, le **prendre en charge** ;
   1-9, les **preuves** (derniers messages du joueur signalé, pour `reports.evidence-reasons`).
-- **`/appel`** (joueurs) : ses sanctions en cours et ses avertissements, faire appel (une fois par sanction), l'état
+- **`/appeal`** (joueurs) : ses sanctions en cours et ses avertissements, faire appel (une fois par sanction), l'état
   et la réponse du staff. Le joueur ne voit pas qui l'a sanctionné.
 - **`/report [joueur]`** (joueurs) : le motif dans un menu (`reports.reasons`), un détail facultatif ; un signalement
   par `reports.cooldown-seconds` (Redis, réseau). Le staff est alerté ; l'auteur est prévenu quand c'est traité.
@@ -113,7 +113,7 @@ Chaque grade du staff reçoit exactement ce qu'il peut faire (LuckPerms). `eter.
 | `eter.mod.reports` | traiter les signalements |
 | `eter.vanish.see` (EterLib) | voir les invisibles (donné par `eter.mod.*`) |
 | `eter.mod.bypass.filter` | pas de filtre du chat |
-| `eter.mod.appeal` | `/appel` (tout le monde) |
+| `eter.mod.appeal` | `/appeal` (tout le monde) |
 | `eter.mod.report` | `/report` (tout le monde) |
 
 Les permissions des motifs sont créées au démarrage d'après la config (enfants de `eter.mod.motive.*`).
@@ -124,7 +124,7 @@ Les permissions des motifs sont créées au démarrage d'après la config (enfan
   `Enforcement` (application, canal proxy), `MuteGuard` (bloque chat et messages privés au plus tôt, `LOWEST`),
   `Labels` (textes : type, motif, durée, date).
 - **`appeal`** : `etermod_appeals`, un appel par sanction ; accepté = sanction levée ; la réponse va au joueur où qu'il
-  soit, et reste visible dans `/appel`.
+  soit, et reste visible dans `/appeal`.
 - **`alert`** : `StaffAlerts`, alertes à `eter.mod.alerts` sur tout le réseau (sanction donnée ou levée, appel, mot
   interdit...), dans la console, et sur un salon Discord (`discord.webhook-url`, alertes de `discord.alerts`, sans
   mention possible) ; `MiningAlerts` (minage suspect : trop de filons de diamant ou de débris pour la pierre cassée en
@@ -179,7 +179,7 @@ Les permissions des motifs sont créées au démarrage d'après la config (enfan
 - **`report`** : `etermod_reports`, ouverts jusqu'à ce qu'un membre du staff les traite (`claimed_by`, `false_report`,
   `evidence`).
 - **`menu`** : `ModGui` (chargement en tâche de fond puis ouverture, fenêtres) et les menus. Cadre rouge pour le staff,
-  orange pour `/appel`.
+  orange pour `/appeal`.
 
 ## Tables (`etermod_`)
 

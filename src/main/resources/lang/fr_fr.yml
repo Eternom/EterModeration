@@ -54,17 +54,17 @@ sanction:
 # Ce que reçoit le joueur sanctionné (où qu'il soit sur le réseau)
 notify:
   kick: "<error>Tu es expulsé du réseau</error> <info>(<accent><motive></accent>). <reason>"
-  changed: "<info>La durée de ta sanction (<type>) a changé : <accent><time></accent>. <dark_gray>Tes sanctions : <click:run_command:'/appel'><accent>/appel</accent></click>"
+  changed: "<info>La durée de ta sanction (<type>) a changé : <accent><time></accent>. <dark_gray>Tes sanctions : <click:run_command:'/appeal'><accent>/appeal</accent></click>"
   report-closed: "<info>Ton signalement contre <accent><player></accent> a été traité par le staff. Merci !"
-  warn: "<error>Avertissement</error> <info>pour <accent><motive></accent>. <reason> <dark_gray>Le prochain sera plus lourd. Tes sanctions : <click:run_command:'/appel'><accent>/appel</accent></click>"
-  mute: "<error>Tu es muet pour <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Ni chat ni messages privés. Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
+  warn: "<error>Avertissement</error> <info>pour <accent><motive></accent>. <reason> <dark_gray>Le prochain sera plus lourd. Tes sanctions : <click:run_command:'/appeal'><accent>/appeal</accent></click>"
+  mute: "<error>Tu es muet pour <accent><time></accent></error> <info>(<accent><motive></accent>). <reason> <dark_gray>Ni chat ni messages privés. Faire appel : <click:run_command:'/appeal'><accent>/appeal</accent></click>"
   ban: "<error>Tu es banni du réseau</error> <info>(<accent><motive></accent>). <reason>"
   lifted: "<success>Ta sanction (<type>) a été levée.</success>"
   appeal-accepted: "<success>Ton appel est accepté : ta sanction est levée.</success> <info>Réponse : <accent><answer>"
   appeal-refused: "<error>Ton appel est refusé.</error> <info>Réponse : <accent><answer>"
 
 mute:
-  blocked: "<error>Tu es muet encore <accent><time></accent> (<motive>).</error> <dark_gray>Faire appel : <click:run_command:'/appel'><accent>/appel</accent></click>"
+  blocked: "<error>Tu es muet encore <accent><time></accent> (<motive>).</error> <dark_gray>Faire appel : <click:run_command:'/appeal'><accent>/appeal</accent></click>"
 
 filter:
   advert: "<error>Pas de publicité : les adresses de serveurs et de sites sont interdites."
@@ -75,7 +75,7 @@ filter:
 
 appeal:
   too-short: "<error>Explique-toi un peu plus (10 caractères au moins)."
-  sent: "<success>✔</success> <info>Appel envoyé : le staff te répondra ici, ou dans <accent>/appel</accent>."
+  sent: "<success>✔</success> <info>Appel envoyé : le staff te répondra ici, ou dans <accent>/appeal</accent>."
   already: "<error>Tu as déjà fait appel de cette sanction."
   already-answered: "<error>Cet appel a déjà été traité."
   answered-accepted: "<success>✔</success> <info>Appel de <accent><player></accent> accepté : sanction levée."
@@ -449,7 +449,7 @@ notice:
   returning: "<info>Content de te revoir. Ton ban est terminé : relis les règles sur le site pour que ça ne se reproduise pas."
   warn:
     title: "<error>Avertissement"
-    body: "<info>Tu as reçu un avertissement pour <accent><motive></accent>. <reason><newline><newline>Le prochain sera plus lourd. Tes sanctions : <accent>/appel</accent>"
+    body: "<info>Tu as reçu un avertissement pour <accent><motive></accent>. <reason><newline><newline>Le prochain sera plus lourd. Tes sanctions : <accent>/appeal</accent>"
     accept: "J'ai compris"
     later: "Plus tard"
 

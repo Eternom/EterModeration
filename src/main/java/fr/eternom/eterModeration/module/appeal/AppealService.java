@@ -15,9 +15,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Optional;
 
 /**
- * Faire appel d'une sanction (le joueur, /appel) et y répondre (staff, eter.mod.appeals). Un seul appel par sanction ;
+ * Faire appel d'une sanction (le joueur, /appeal) et y répondre (staff, eter.mod.appeals). Un seul appel par sanction ;
  * accepté, la sanction est levée ; refusé, elle reste. Le joueur reçoit la réponse où qu'il soit, et la retrouve
- * dans /appel s'il n'était pas là.
+ * dans /appeal s'il n'était pas là.
  */
 public class AppealService {
 

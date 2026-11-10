@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-/** /appel : ses sanctions et ses appels (tout joueur). */
+/** /appeal : ses sanctions et ses appels (tout joueur). */
 public class AppealCommand implements TabExecutor {
 
     private final ModGui gui;

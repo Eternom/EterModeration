@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * /appel : les sanctions du joueur qui comptent encore (en cours, avertissements) et l'état de son appel. Clic sur une
+ * /appeal : les sanctions du joueur qui comptent encore (en cours, avertissements) et l'état de son appel. Clic sur une
  * sanction sans appel : écrire son appel (une seule fois par sanction). Le joueur ne voit ni les notes ni le staff.
  */
 class MyAppealsMenu implements Menu {

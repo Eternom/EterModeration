@@ -13,12 +13,11 @@ commands:
   mod:
     description: Le menu de modération (ou la fiche d'un joueur).
     usage: /mod [joueur]
-    aliases: [moderation, sanction]
+    aliases: [moderation]
     permission: eter.mod.use
-  appel:
+  appeal:
     description: Tes sanctions, et faire appel.
-    usage: /appel
-    aliases: [appeal]
+    usage: /appeal
     permission: eter.mod.appeal
   staff:
     description: Entrer dans le mode staff ou en sortir (invisible, outils).
@@ -28,13 +27,12 @@ commands:
   report:
     description: Signaler un joueur au staff.
     usage: /report [joueur]
-    aliases: [signaler]
     permission: eter.mod.report
 
 # Une permission par action : chaque grade du staff reçoit exactement ce qu'il peut faire (LuckPerms).
 permissions:
   eter.mod.appeal:
-    description: Voir ses sanctions et faire appel (/appel).
+    description: Voir ses sanctions et faire appel (/appeal).
     default: true
   eter.mod.report:
     description: Signaler un joueur (/report).

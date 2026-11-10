@@ -4,7 +4,7 @@
 #
 #  À installer sur TOUS les serveurs Paper, avec EterVelocityModeration sur le proxy (c'est lui qui refuse les
 #  bannis). Les sanctions sont dans la base commune : une sanction donnée sur
-#  un serveur vaut partout. Tout se fait dans /mod (staff) et /appel (joueurs).
+#  un serveur vaut partout. Tout se fait dans /mod (staff) et /appeal (joueurs).
 #  Une permission par action (voir le README) : chaque grade du staff reçoit seulement ce qu'il peut faire.
 #  Les textes (noms des motifs compris) sont dans lang/. Aussi : /staff (mode staff), /report (signalements). Toute modification nécessite un redémarrage du serveur.
 
@@ -165,7 +165,7 @@ block-log:
 staff-log:
   days: 90
 
-# Bouton Retour des menus des joueurs (/appel, /report) : la commande lancée ("menu social" : le sous-menu Social de
+# Bouton Retour des menus des joueurs (/appeal, /report) : la commande lancée ("menu social" : le sous-menu Social de
 # /menu), vide pour le menu central, "close" pour fermer.
 menus:
   back-command: "menu social"
