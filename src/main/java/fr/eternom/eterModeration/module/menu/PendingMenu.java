@@ -81,6 +81,6 @@ class PendingMenu implements Menu {
         if (list.isEmpty()) {
             inventory.setItem(22, Items.item(Material.LIME_DYE, messages.get(viewer, "pending.empty"), List.of()));
         }
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-staff"), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "menu.back-to-staff"), List.of()));
     }
 }

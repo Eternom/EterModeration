@@ -95,6 +95,6 @@ class HistoryMenu implements Menu {
         if (history.isEmpty()) {
             inventory.setItem(22, Items.item(Material.LIME_DYE, messages.get(viewer, "history.empty"), List.of()));
         }
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-player", "player", target.name()), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "menu.back-to-player", "player", target.name()), List.of()));
     }
 }

@@ -63,6 +63,6 @@ class RecentMenu implements Menu {
             sanctionAt.put(slot, sanction);
             inventory.setItem(slot, gui.sanctionItem(viewer, sanction, List.of(messages.get(viewer, "recent.click"))));
         }
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-staff"), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "menu.back-to-staff"), List.of()));
     }
 }

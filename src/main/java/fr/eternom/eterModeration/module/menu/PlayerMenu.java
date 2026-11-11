@@ -157,7 +157,7 @@ class PlayerMenu implements Menu {
             inventory.setItem(GOTO, button(Material.ENDER_PEARL, "player.goto", StaffMode.PERMISSION));
             inventory.setItem(FREEZE, button(Material.PACKED_ICE, "player.freeze", Freeze.PERMISSION));
         }
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-staff"), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "menu.back-to-staff"), List.of()));
     }
 
     private boolean online() {

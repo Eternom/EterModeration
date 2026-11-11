@@ -84,6 +84,6 @@ class AltsMenu implements Menu {
             inventory.setItem(BAN_ALTS, Items.item(can ? Material.TNT : Material.GRAY_DYE, messages.get(viewer, "alts.ban.name"),
                     List.of(messages.get(viewer, can ? "alts.ban.lore" : "menu.locked"))));
         }
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-player", "player", target.name()), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "menu.back-to-player", "player", target.name()), List.of()));
     }
 }

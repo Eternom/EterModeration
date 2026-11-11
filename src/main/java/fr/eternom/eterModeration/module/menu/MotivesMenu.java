@@ -125,6 +125,6 @@ class MotivesMenu implements Menu {
                     messages.get(viewer, "motives.free.name", "type", labels.type(viewer, type)),
                     List.of(messages.get(viewer, can ? "motives.free.lore" : "menu.locked"))));
         });
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-player", "player", target.name()), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "menu.back-to-player", "player", target.name()), List.of()));
     }
 }
