@@ -157,6 +157,8 @@ public class StaffMode implements Listener {
         }
     }
 
+    private final java.util.Map<UUID, net.kyori.adventure.bossbar.BossBar> bars = new java.util.concurrent.ConcurrentHashMap<>();
+
     /** L'inventaire part en base AVANT d'être vidé : rien n'est perdu si le serveur s'arrête entre les deux. */
     private void enable(Player player) {
         UUID uuid = player.getUniqueId();
@@ -204,6 +206,7 @@ public class StaffMode implements Listener {
             player.setInvulnerable(false);
             player.setAffectsSpawning(true);
             EterLib.get().getVanish().set(player, false);
+            hideBar(player);
             messages.send(player, "staff.off");
             alerts.alert("alert.staff-off", "staff", player.getName());
         }, () -> {
@@ -215,11 +218,22 @@ public class StaffMode implements Listener {
     /** Thread principal : invisible, vol, invulnérable, pas de monstres qui apparaissent autour. */
     private void protect(Player player) {
         active.add(player.getUniqueId());
+        // Une barre de boss tant que le mode est actif : on ne l'oublie pas
+        net.kyori.adventure.bossbar.BossBar bar = bars.computeIfAbsent(player.getUniqueId(), uuid -> net.kyori.adventure.bossbar.BossBar.bossBar(
+                messages.get(player, "staff.bar"), 1f, net.kyori.adventure.bossbar.BossBar.Color.RED, net.kyori.adventure.bossbar.BossBar.Overlay.PROGRESS));
+        player.showBossBar(bar);
         EterLib.get().getVanish().set(player, true);
         player.setAllowFlight(true);
         player.setFlying(true);
         player.setInvulnerable(true);
         player.setAffectsSpawning(false);
+    }
+
+    private void hideBar(Player player) {
+        net.kyori.adventure.bossbar.BossBar bar = bars.remove(player.getUniqueId());
+        if (bar != null) {
+            player.hideBossBar(bar);
+        }
     }
 
     /** Thread principal : les outils qui manquent dans la barre. */
@@ -274,6 +288,7 @@ public class StaffMode implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent event) {
+        bars.remove(event.getPlayer().getUniqueId());
         active.remove(event.getPlayer().getUniqueId());
         busy.remove(event.getPlayer().getUniqueId());
     }

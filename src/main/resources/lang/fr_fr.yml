@@ -66,6 +66,18 @@ notify:
 mute:
   blocked: "<error>Tu es muet encore <accent><time></accent> (<motive>).</error> <dark_gray>Faire appel : <click:run_command:'/appeal'><accent>/appeal</accent></click>"
 
+# Mots interdits ajoutés en jeu (/mod filter), communs au réseau
+filter-admin:
+  usage: "<error>/mod filter add <mot> <dark_gray>·</dark_gray> /mod filter remove <mot> <dark_gray>·</dark_gray> /mod filter list"
+  added: "<success>✔</success> <info>« <accent><word></accent> » est interdit sur tout le réseau."
+  already: "<error>« <accent><word></accent> » est déjà dans la liste."
+  removed: "<success>✔</success> <info>« <accent><word></accent> » n'est plus interdit."
+  unknown: "<error>« <accent><word></accent> » n'a pas été ajouté en jeu (ceux de config.yml se retirent dans le fichier)."
+  empty: "<info>Aucun mot ajouté en jeu <dark_gray>(ceux de config.yml s'appliquent toujours)."
+  header: "<info>Mots interdits ajoutés en jeu (<accent><count></accent>) :"
+  line: "<dark_gray>▸ <accent><word></accent> <dark_gray>(<staff>)"
+
+
 filter:
   advert: "<error>Pas de publicité : les adresses de serveurs et de sites sont interdites."
   spam: "<error>Doucement : trop de messages d'un coup."
@@ -119,6 +131,7 @@ menu:
   back-to-player: "<accent>« Fiche de <player>"
 
 staff:
+  bar: "<red><bold>MODE STAFF</bold></red> <dark_gray>· <info>invisible, invulnérable <dark_gray>· <info>outils dans la barre"
   pending:
     name: "<accent>Bans définitifs à valider <dark_gray>(<count>)"
     lore: "<dark_gray>▸ <info>Demandés par un autre membre du staff"

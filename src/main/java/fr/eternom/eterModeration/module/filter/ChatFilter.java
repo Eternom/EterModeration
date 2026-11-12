@@ -37,6 +37,8 @@ public class ChatFilter {
     private volatile int capsMinLength;
     private volatile int capsMaxPercent;
     private volatile List<String> words;
+    /** Mots ajoutés en jeu (/mod filter), communs au réseau. */
+    private volatile List<String> extraWords = List.of();
     private volatile boolean blockAdverts;
     /** Adresses permises (le site, le Discord du serveur), retirées du texte avant la recherche de pub. */
     private volatile List<String> allowedDomains;
@@ -59,6 +61,11 @@ public class ChatFilter {
         this.blockAdverts = config == null || config.getBoolean("adverts.enabled", true);
         this.allowedDomains = config == null ? List.of() : config.getStringList("adverts.allowed").stream()
                 .map(domain -> domain.toLowerCase(Locale.ROOT)).toList();
+    }
+
+    /** Les mots ajoutés en jeu (FilterWords), en plus de ceux de config.yml. */
+    public void setExtraWords(java.util.Collection<String> extra) {
+        this.extraWords = extra.stream().map(ChatFilter::normalize).filter(word -> !word.isBlank()).toList();
     }
 
     /** Un texte écrit ailleurs que dans le chat (panneau, livre, enclume) : seulement les mots interdits et la pub. */
@@ -110,7 +117,7 @@ public class ChatFilter {
         String normalized = normalize(text);
         String padded = " " + normalized + " ";
         String joined = " " + joinSingleLetters(normalized) + " ";
-        for (String word : words) {
+        for (String word : java.util.stream.Stream.concat(words.stream(), extraWords.stream()).toList()) {
             if (padded.contains(" " + word + " ") || joined.contains(" " + word + " ")) {
                 return true;
             }

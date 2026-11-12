@@ -14,7 +14,8 @@ import java.util.Objects;
 public class Commands {
 
     public Commands(Main main) {
-        register(main, "mod", new ModCommand(main.getGui(), EterLib.get().getOnlineNames(), main.getMessages(), main::reload));
+        register(main, "mod", new ModCommand(main.getGui(), EterLib.get().getOnlineNames(), main.getMessages(), main::reload,
+                main, main.getFilterWords()));
         register(main, "appeal", new AppealCommand(main.getGui(), main.getMessages()));
         register(main, "staff", new StaffCommand(main.getStaffMode(), main.getMessages()));
         register(main, "report", new ReportCommand(main.getGui(), EterLib.get().getOnlineNames(), main.getMessages()));

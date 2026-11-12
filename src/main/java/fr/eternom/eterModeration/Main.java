@@ -72,6 +72,7 @@ public final class Main extends JavaPlugin {
     private StaffMode staffMode;
     private Motives motives;
     private ChatFilter chatFilter;
+    private fr.eternom.eterModeration.module.filter.FilterWords filterWords;
 
     /** /mod reload : config.yml relu ; le barème et le filtre changent tout de suite (le reste au redémarrage). */
     public void reload() {
@@ -141,6 +142,8 @@ public final class Main extends JavaPlugin {
 
         muteGuard = new MuteGuard(enforcement, messages, labels, privateCommands);
         chatFilter = new ChatFilter(getConfig().getConfigurationSection("filter"));
+        filterWords = new fr.eternom.eterModeration.module.filter.FilterWords(this, redis, bus, chatFilter);
+        filterWords.start();
         filterListener = new FilterListener(this, chatFilter, sanctions, motives, alerts, messages, privateCommands,
                 getConfig().getConfigurationSection("filter"));
         recordListener = new RecordListener(this, records, server, privateCommands);
@@ -194,6 +197,10 @@ public final class Main extends JavaPlugin {
 
     public Messages getMessages() {
         return messages;
+    }
+
+    public fr.eternom.eterModeration.module.filter.FilterWords getFilterWords() {
+        return filterWords;
     }
 
     public ModGui getGui() {

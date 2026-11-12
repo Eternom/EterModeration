@@ -120,6 +120,9 @@ permissions:
   eter.mod.reload:
     description: '/mod reload : relire le barème et le filtre.'
     default: op
+  eter.mod.filter:
+    description: '/mod filter add|remove|list : les mots interdits ajoutés en jeu, communs au réseau.'
+    default: op
   eter.mod.bypass.filter:
     description: Pas de filtre du chat (ni des panneaux, livres, enclume).
     default: op
@@ -160,5 +163,6 @@ permissions:
       eter.mod.alerts: true
       eter.mod.staffstats: true
       eter.mod.reload: true
+      eter.mod.filter: true
       eter.mod.bypass.filter: true
       eter.mod.bypass.xray: true

@@ -64,6 +64,18 @@ notify:
 mute:
   blocked: "<error>You are muted for <accent><time></accent> more (<motive>).</error> <dark_gray>Appeal: <click:run_command:'/appeal'><accent>/appeal</accent></click>"
 
+# Banned words added in game (/mod filter), shared by the network
+filter-admin:
+  usage: "<error>/mod filter add <word> <dark_gray>·</dark_gray> /mod filter remove <word> <dark_gray>·</dark_gray> /mod filter list"
+  added: "<success>✔</success> <info>“<accent><word></accent>” is banned on the whole network."
+  already: "<error>“<accent><word></accent>” is already in the list."
+  removed: "<success>✔</success> <info>“<accent><word></accent>” is no longer banned."
+  unknown: "<error>“<accent><word></accent>” wasn't added in game (words from config.yml are removed in the file)."
+  empty: "<info>No word added in game <dark_gray>(words from config.yml still apply)."
+  header: "<info>Banned words added in game (<accent><count></accent>):"
+  line: "<dark_gray>▸ <accent><word></accent> <dark_gray>(<staff>)"
+
+
 filter:
   advert: "<error>No advertising: server and website addresses are not allowed."
   spam: "<error>Slow down: too many messages at once."
@@ -116,6 +128,7 @@ menu:
   back-to-player: "<accent>« <player>'s profile"
 
 staff:
+  bar: "<red><bold>STAFF MODE</bold></red> <dark_gray>· <info>invisible, invulnerable <dark_gray>· <info>tools in your hotbar"
   pending:
     name: "<accent>Permanent bans to approve <dark_gray>(<count>)"
     lore: "<dark_gray>▸ <info>Requested by another staff member"
