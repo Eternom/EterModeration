@@ -80,8 +80,9 @@ freeze:
   quit-grace-seconds: 15
 
 
-# Commandes de messages privés : bloquées pour un joueur muet, filtrées (mots interdits) et gardées dans le journal.
-private-commands: [msg, tell, w, m, whisper, pm, r, reply]
+# Commandes de messages privés (et chat de clan) : bloquées pour un joueur muet, filtrées (mots interdits) et gardées
+# dans le journal. Le chat de clan (clanchat, c) est toujours ajouté, même à une ancienne liste.
+private-commands: [msg, tell, w, m, whisper, pm, r, reply, clanchat, c]
 
 # Journal du chat (chat et messages privés), consultable par le staff (eter.mod.chatlog).
 chat-log:

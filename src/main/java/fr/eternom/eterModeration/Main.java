@@ -115,7 +115,9 @@ public final class Main extends JavaPlugin {
         PlayerNotices notices = new PlayerNotices(this, redis, sanctionRepository, messages, labels);
         enforcement.setNotices(notices);
         AppealService appeals = new AppealService(this, new AppealRepository(database), sanctions, alerts, bus, messages, labels);
-        Set<String> privateCommands = lower(getConfig().getStringList("private-commands"));
+        Set<String> privateCommands = new HashSet<>(lower(getConfig().getStringList("private-commands")));
+        // Le chat de clan (EterChat 1.5.0) : un ancien config.yml ne le liste pas encore
+        privateCommands.addAll(Set.of("clanchat", "c"));
         freeze = new Freeze(this, redis, bus, alerts, messages, privateCommands, registry, records, staffLog, lib.getPlayers(), sanctions,
                 motives, getConfig().getConfigurationSection("freeze"));
         ReportService reports = new ReportService(this, new ReportRepository(database), redis, bus, alerts, messages, server,
